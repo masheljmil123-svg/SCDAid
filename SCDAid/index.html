@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SCDAid</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div class="page">
+    <header class="header">
+      <div>
+        <h1 id="titleText">SCDAid</h1>
+        <p id="subtitleText" class="subtitle">
+          SCD VOC analgesia decision support (Prototype) — Severity + CPIC (CYP2D6) + Renal/Safety guardrails
+        </p>
+      </div>
+
+      <button id="langToggle" class="btn btn-ghost" type="button">AR</button>
+    </header>
+
+    <main class="grid">
+      <!-- LEFT: INPUTS -->
+      <section class="card">
+        <h2 id="patientInputsTitle" class="card-title">Patient Inputs</h2>
+
+        <div class="form">
+          <!-- Age -->
+          <label id="ageLabel" for="ageInput">Age (years) *</label>
+          <input id="ageInput" type="number" min="0" step="1" placeholder="e.g., 22" />
+
+          <!-- Weight -->
+          <label id="weightLabel" for="weightInput">Weight (kg) *</label>
+          <input id="weightInput" type="number" min="0" step="0.1" placeholder="e.g., 60" />
+          <small id="weightHint" class="hint">Used to display weight-based starting doses.</small>
+
+          <!-- eGFR -->
+          <label id="egfrLabel" for="gfrInput">eGFR (ml/min) *</label>
+          <input id="gfrInput" type="number" min="0" step="1" placeholder="e.g., 90" />
+          <small id="egfrHint" class="hint">Renal branching may change preferred opioid.</small>
+
+          <!-- Crises -->
+          <label id="crisesLabel" for="crisesInput">Crises/year (optional)</label>
+          <input id="crisesInput" type="number" min="0" step="1" placeholder="e.g., 3" />
+          <small id="crisesHint" class="hint">Context only (not used in dosing yet).</small>
+
+          <!-- Severity -->
+          <label id="severityLabel" for="severityInput">VOC pain severity *</label>
+          <select id="severityInput">
+            <option id="sevMild" value="mild">Mild</option>
+            <option id="sevModerate" value="moderate" selected>Moderate (4–6/10)</option>
+            <option id="sevSevere" value="severe">Severe</option>
+          </select>
+          <small id="severityHint" class="hint">Drives pathway intensity + monitoring.</small>
+
+          <!-- NEW: Genotype availability -->
+          <label id="genoAvailLabel" for="genoAvail">CYP2D6 genotyping</label>
+          <select id="genoAvail">
+            <option value="known" selected>Known / Available</option>
+            <option value="unknown">Unknown / Not available</option>
+          </select>
+          <small id="genoAvailHint" class="hint">If genotype is unknown, the tool will show clinical clues (informational only).</small>
+
+          <!-- NEW: Hint box -->
+          <div id="genoHintBox" class="hidden"></div>
+
+          <!-- CYP2D6 phenotype -->
+          <label id="cypLabel" for="cyp2d6Input">CYP2D6 phenotype</label>
+          <select id="cyp2d6Input">
+            <option id="phEM" value="EM" selected>EM (Normal)</option>
+            <option id="phIM" value="IM">IM (Intermediate)</option>
+            <option id="phPM" value="PM">PM (Poor)</option>
+            <option id="phUM" value="UM">UM (Ultrarapid)</option>
+          </select>
+          <small id="cypHint" class="hint">Applied to codeine/tramadol only (CPIC).</small>
+
+          <!-- Safety -->
+          <h3 id="safetyTitle" class="section-title">Safety & context</h3>
+
+          <div class="checks">
+            <label class="check">
+              <input id="opioidTol" type="checkbox" />
+              <span id="opioidTolLabel">Opioid-tolerant / chronic opioid use</span>
+            </label>
+
+            <label class="check">
+              <input id="sedatives" type="checkbox" />
+              <span id="sedativesLabel">Concomitant sedatives (benzodiazepines/EtOH/other CNS depressants)</span>
+            </label>
+
+            <label class="check">
+              <input id="morphineAllergy" type="checkbox" />
+              <span id="morphineAllergyLabel">Morphine intolerance/allergy (use alternative)</span>
+            </label>
+
+            <label class="check">
+              <input id="respRisk" type="checkbox" />
+              <span id="respRiskLabel">Respiratory depression risk (OSA/COPD/prior oversedation)</span>
+            </label>
+
+            <label class="check">
+              <input id="suspectedACS" type="checkbox" />
+              <span id="acsLabel">Suspected acute chest syndrome / hypoxia</span>
+            </label>
+          </div>
+
+          <p id="formMsg" class="form-msg"></p>
+
+          <div class="actions">
+            <button id="runAlgoBtn" class="btn btn-primary" type="button">Run Algorithm</button>
+            <button id="clearBtn" class="btn btn-ghost" type="button">Clear</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: RESULTS -->
+      <section class="card">
+        <h2 class="card-title">Output</h2>
+
+        <div id="emptyResult" class="empty">
+          Run the algorithm to see recommendations.
+        </div>
+
+        <div id="resultBox" class="result hidden theme-green">
+          <div class="topline">
+            <div id="stepLine" class="step"></div>
+            <div class="pills">
+              <span id="preferredPill" class="pill"></span>
+              <span id="riskPill" class="pill"></span>
+            </div>
+          </div>
+
+          <div id="resultHtml" class="result-html"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>Prototype for educational use only.</span>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
