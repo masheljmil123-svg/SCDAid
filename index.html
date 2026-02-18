@@ -1,84 +1,107 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" dir="ltr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>SCDAid</title>
 
-  <!-- IMPORTANT: keep these relative to the same folder -->
+  <!-- IMPORTANT: use relative paths for GitHub Pages -->
   <link rel="stylesheet" href="./style.css" />
 </head>
 
 <body>
   <div class="page">
-    <header class="header">
+    <header class="header card">
       <div class="brand">
-        <img src="./logo.png" alt="SCDAid Logo" class="logo" onerror="this.style.display='none'"/>
-        <div>
-          <h1 id="titleText">SCDAid</h1>
+        <!-- Put logo.png in the same folder as index.html -->
+        <img class="logo" src="./logo.png" alt="SCDAid Logo" onerror="this.style.display='none'">
+        <div class="brand-text">
+          <div class="title-row">
+            <h1 id="titleText">SCDAid</h1>
+            <span class="badge">Prototype</span>
+          </div>
           <p id="subtitleText" class="subtitle">
-            SCD VOC analgesia decision support (Prototype) — Severity + CPIC (CYP2D6) + Renal/Safety guardrails
+            SCD VOC analgesia decision support — Severity + CPIC (CYP2D6) + Renal & Safety guardrails
           </p>
         </div>
       </div>
 
-      <button id="langToggle" class="btn btn-ghost" type="button">AR</button>
+      <div class="header-actions">
+        <button id="langToggle" class="btn btn-ghost" type="button">AR</button>
+      </div>
     </header>
 
     <main class="grid">
+      <!-- Left: Inputs -->
       <section class="card">
         <h2 id="patientInputsTitle" class="card-title">Patient Inputs</h2>
 
-        <div class="form">
-          <label id="ageLabel" for="ageInput">Age (years) *</label>
-          <input id="ageInput" type="number" min="0" step="1" placeholder="e.g., 22" />
+        <div class="form-grid">
+          <div class="field">
+            <label id="ageLabel" for="ageInput">Age (years) *</label>
+            <input id="ageInput" type="number" min="0" step="1" placeholder="e.g., 22" />
+          </div>
 
-          <label id="weightLabel" for="weightInput">Weight *</label>
-          <div class="inline-field">
-            <input id="weightInput" type="number" min="0" step="0.1" placeholder="e.g., 60" />
-            <select id="weightUnit" aria-label="Weight unit">
-              <option value="kg" selected>kg</option>
-              <option value="lb">lb</option>
+          <div class="field">
+            <label id="weightLabel" for="weightInput">Weight *</label>
+            <div class="inline">
+              <input id="weightInput" type="number" min="0" step="0.1" placeholder="e.g., 60" />
+              <select id="weightUnit" aria-label="Weight unit">
+                <option value="kg" selected>kg</option>
+                <option value="lb">lb</option>
+              </select>
+            </div>
+            <div id="weightHint" class="hint">Used to calculate adult starting doses.</div>
+          </div>
+
+          <div class="field">
+            <label id="egfrLabel" for="gfrInput">eGFR (mL/min/1.73m²) *</label>
+            <input id="gfrInput" type="number" min="0" step="1" placeholder="e.g., 95" />
+            <div id="egfrHint" class="hint">Enter eGFR (mL/min/1.73m²).</div>
+          </div>
+
+          <div class="field">
+            <label id="doseUnitLabel" for="doseUnit">Output Dose Unit</label>
+            <select id="doseUnit">
+              <option value="mg" selected>mg</option>
+              <option value="mcg">mcg</option>
+              <option value="g">g</option>
+            </select>
+            <div id="doseUnitHint" class="hint">Controls the unit used when displaying calculated doses.</div>
+          </div>
+
+          <div class="field">
+            <label id="crisesLabel" for="crisesInput">Pain crises/year (optional)</label>
+            <input id="crisesInput" type="number" min="0" step="1" placeholder="e.g., 4" />
+          </div>
+
+          <div class="field">
+            <label id="severityLabel" for="severityInput">Pain severity *</label>
+            <select id="severityInput">
+              <option value="mild">Mild</option>
+              <option value="moderate" selected>Moderate</option>
+              <option value="severe">Severe</option>
             </select>
           </div>
-          <small id="weightHint" class="hint">Used to calculate adult starting doses.</small>
 
-          <label id="egfrLabel" for="gfrInput">eGFR (mL/min/1.73m²) *</label>
-          <input id="gfrInput" type="number" min="0" step="1" placeholder="e.g., 95" />
-          <small id="egfrHint" class="hint">Enter eGFR (mL/min/1.73m²).</small>
+          <div class="field">
+            <label id="genoAvailLabel" for="genoAvail">CYP2D6 genotype availability</label>
+            <select id="genoAvail">
+              <option value="known" selected>Known</option>
+              <option value="unknown">Unknown</option>
+            </select>
+            <div id="genoAvailHint" class="hint">If unknown, tool avoids CYP2D6-dependent opioids.</div>
+          </div>
 
-          <label id="doseUnitLabel" for="doseUnit">Output Dose Unit</label>
-          <select id="doseUnit">
-            <option value="mg" selected>mg</option>
-            <option value="mcg">mcg</option>
-            <option value="g">g</option>
-          </select>
-          <small id="doseUnitHint" class="hint">Controls the unit used when displaying calculated doses.</small>
-
-          <label id="crisesLabel" for="crisesInput">Pain crises/year (optional)</label>
-          <input id="crisesInput" type="number" min="0" step="1" placeholder="e.g., 4" />
-
-          <label id="severityLabel" for="severityInput">Pain severity *</label>
-          <select id="severityInput">
-            <option value="mild">Mild</option>
-            <option value="moderate" selected>Moderate</option>
-            <option value="severe">Severe</option>
-          </select>
-
-          <label id="genoAvailLabel" for="genoAvail">CYP2D6 genotype availability</label>
-          <select id="genoAvail">
-            <option value="known" selected>Known</option>
-            <option value="unknown">Unknown</option>
-          </select>
-          <small id="genoAvailHint" class="hint">If unknown, tool avoids CYP2D6-dependent opioids.</small>
-
-          <label id="cypLabel" for="cyp2d6Input">CYP2D6 phenotype</label>
-          <select id="cyp2d6Input">
-            <option value="PM">Poor (PM)</option>
-            <option value="IM">Intermediate (IM)</option>
-            <option value="EM" selected>Normal (EM)</option>
-            <option value="UM">Ultrarapid (UM)</option>
-          </select>
+          <div class="field">
+            <label id="cypLabel" for="cyp2d6Input">CYP2D6 phenotype</label>
+            <select id="cyp2d6Input">
+              <option value="PM">Poor (PM)</option>
+              <option value="IM">Intermediate (IM)</option>
+              <option value="EM" selected>Normal (EM)</option>
+              <option value="UM">Ultrarapid (UM)</option>
+            </select>
+          </div>
 
           <div class="divider"></div>
 
@@ -95,19 +118,18 @@
             <button id="resetBtn" class="btn" type="button">Reset</button>
           </div>
 
-          <p class="smallprint" id="disclaimerText">
+          <div id="disclaimerText" class="smallprint">
             Educational prototype only. Not a substitute for clinical judgment.
-          </p>
+          </div>
         </div>
       </section>
 
+      <!-- Right: Results -->
       <section class="card">
         <h2 id="resultsTitle" class="card-title">Results</h2>
 
         <div id="results" class="results">
-          <div class="placeholder" id="placeholderText">
-            Enter inputs then click "Run Algorithm".
-          </div>
+          <div id="placeholderText" class="placeholder">Enter inputs then click "Run Algorithm".</div>
         </div>
 
         <div class="refs">
