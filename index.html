@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SCDAid</title>
+
+  <!-- IMPORTANT: keep these relative to the same folder -->
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <div class="page">
+    <header class="header">
+      <div class="brand">
+        <img src="./logo.png" alt="SCDAid Logo" class="logo" onerror="this.style.display='none'"/>
+        <div>
+          <h1 id="titleText">SCDAid</h1>
+          <p id="subtitleText" class="subtitle">
+            SCD VOC analgesia decision support (Prototype) — Severity + CPIC (CYP2D6) + Renal/Safety guardrails
+          </p>
+        </div>
+      </div>
+
+      <button id="langToggle" class="btn btn-ghost" type="button">AR</button>
+    </header>
+
+    <main class="grid">
+      <section class="card">
+        <h2 id="patientInputsTitle" class="card-title">Patient Inputs</h2>
+
+        <div class="form">
+          <label id="ageLabel" for="ageInput">Age (years) *</label>
+          <input id="ageInput" type="number" min="0" step="1" placeholder="e.g., 22" />
+
+          <label id="weightLabel" for="weightInput">Weight *</label>
+          <div class="inline-field">
+            <input id="weightInput" type="number" min="0" step="0.1" placeholder="e.g., 60" />
+            <select id="weightUnit" aria-label="Weight unit">
+              <option value="kg" selected>kg</option>
+              <option value="lb">lb</option>
+            </select>
+          </div>
+          <small id="weightHint" class="hint">Used to calculate adult starting doses.</small>
+
+          <label id="egfrLabel" for="gfrInput">eGFR (mL/min/1.73m²) *</label>
+          <input id="gfrInput" type="number" min="0" step="1" placeholder="e.g., 95" />
+          <small id="egfrHint" class="hint">Enter eGFR (mL/min/1.73m²).</small>
+
+          <label id="doseUnitLabel" for="doseUnit">Output Dose Unit</label>
+          <select id="doseUnit">
+            <option value="mg" selected>mg</option>
+            <option value="mcg">mcg</option>
+            <option value="g">g</option>
+          </select>
+          <small id="doseUnitHint" class="hint">Controls the unit used when displaying calculated doses.</small>
+
+          <label id="crisesLabel" for="crisesInput">Pain crises/year (optional)</label>
+          <input id="crisesInput" type="number" min="0" step="1" placeholder="e.g., 4" />
+
+          <label id="severityLabel" for="severityInput">Pain severity *</label>
+          <select id="severityInput">
+            <option value="mild">Mild</option>
+            <option value="moderate" selected>Moderate</option>
+            <option value="severe">Severe</option>
+          </select>
+
+          <label id="genoAvailLabel" for="genoAvail">CYP2D6 genotype availability</label>
+          <select id="genoAvail">
+            <option value="known" selected>Known</option>
+            <option value="unknown">Unknown</option>
+          </select>
+          <small id="genoAvailHint" class="hint">If unknown, tool avoids CYP2D6-dependent opioids.</small>
+
+          <label id="cypLabel" for="cyp2d6Input">CYP2D6 phenotype</label>
+          <select id="cyp2d6Input">
+            <option value="PM">Poor (PM)</option>
+            <option value="IM">Intermediate (IM)</option>
+            <option value="EM" selected>Normal (EM)</option>
+            <option value="UM">Ultrarapid (UM)</option>
+          </select>
+
+          <div class="divider"></div>
+
+          <div class="checks">
+            <label class="check"><input id="opioidTol" type="checkbox"><span id="opioidTolLabel">Opioid tolerant</span></label>
+            <label class="check"><input id="sedatives" type="checkbox"><span id="sedativesLabel">Concurrent sedatives</span></label>
+            <label class="check"><input id="respRisk" type="checkbox"><span id="respRiskLabel">Respiratory risk</span></label>
+            <label class="check"><input id="suspectedACS" type="checkbox"><span id="acsLabel">Suspected ACS</span></label>
+            <label class="check"><input id="morphineAllergy" type="checkbox"><span id="morphineAllergyLabel">Morphine allergy</span></label>
+          </div>
+
+          <div class="actions">
+            <button id="runBtn" class="btn btn-primary" type="button">Run Algorithm</button>
+            <button id="resetBtn" class="btn" type="button">Reset</button>
+          </div>
+
+          <p class="smallprint" id="disclaimerText">
+            Educational prototype only. Not a substitute for clinical judgment.
+          </p>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 id="resultsTitle" class="card-title">Results</h2>
+
+        <div id="results" class="results">
+          <div class="placeholder" id="placeholderText">
+            Enter inputs then click "Run Algorithm".
+          </div>
+        </div>
+
+        <div class="refs">
+          <h3 id="refsTitle">References</h3>
+          <ul>
+            <li><a id="mohLink" href="#" target="_blank" rel="noreferrer">Saudi MOH Protocol (example)</a></li>
+            <li><a id="cpicLink" href="#" target="_blank" rel="noreferrer">CPIC CYP2D6 opioids guideline</a></li>
+            <li><a id="ashLink" href="#" target="_blank" rel="noreferrer">ASH SCD pain guideline</a></li>
+            <li><a id="owsianyLink" href="#" target="_blank" rel="noreferrer">Owsiany review (open access)</a></li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
