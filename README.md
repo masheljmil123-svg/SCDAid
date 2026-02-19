@@ -31,6 +31,7 @@ SCDAid is designed to:
 It is not a replacement for clinical judgment, but a decision support aid.
 
 Added Value
+
 Unlike simple dose calculators, SCDAid integrates:
 Genotype + Renal Function + Weight + Pain Severity
 into a single structured recommendation output to assist clinicians during acute VOC assessment.
