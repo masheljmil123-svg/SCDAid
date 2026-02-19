@@ -1,44 +1,39 @@
-SCDAid – Genotype-Informed VOC Pain Decision Tool
-3-second precision analgesia with genetic + renal safety guardrails
+SCDAid – Genotype & Renal-Aware VOC Pain Decision Support Tool
+Clinical decision support for acute vaso-occlusive crisis (VOC) integrating genetics, renal function, weight, and pain severity.
 
 The Clinical Problem
-- Delayed analgesia in emergency departments
-- Variability in opioid dosing
-- Renal impairment is not consistently considered
-- CYP2D6 phenotype mismatch (codeine/tramadol risk)
-- Increased risk of respiratory depression or treatment failure
+* Delayed initiation of analgesia in emergency settings
+* Variability in analgesic selection and dosing
+* Renal impairment is not consistently integrated into dosing decisions
+* CYP2D6 phenotype–drug mismatch (codeine/tramadol safety concerns)
+* Risk of under-treatment or adverse effects due to fragmented decision inputs
+Patients with Sickle Cell Disease (SCD) experiencing VOC require rapid, safe, and structured pain management.
 
-Sickle Cell VOC patients require rapid, safe, and standardized analgesia.
+The SCDAid Approach
+SCDAid is a prototype clinical decision support tool that integrates:
+* Patient weight
+* Estimated GFR (renal function)
+* Pain severity
+* CYP2D6 phenotype (if available)
+The tool generates a structured multimodal analgesic recommendation that may include:
+* Opioid options (when clinically indicated)
+* Non-opioid options (e.g., paracetamol; NSAIDs when renal function permits)
+* Renal dose considerations
+* CYP2D6-related precautionary flags (e.g., codeine/tramadol avoidance when relevant)
+* Safety reminders
 
-The SCDAid Solution
+Intended Clinical Contribution
+SCDAid is designed to:
+* Support more consistent analgesic decision-making
+* Highlight renal considerations during drug selection
+* Flag genotype-related safety concerns
+* Facilitate structured multimodal VOC pain planning
+It is not a replacement for clinical judgment, but a decision support aid.
 
-SCDAid integrates:
-
-- Patient Weight (kg)
-- eGFR (renal function)
-- Pain Severity
-- CYP2D6 Phenotype (if available)
-- 
-- And generates:
-
-✔️ Weight-based opioid dosing  
-✔️ Renal dose adjustment  
-✔️ Genotype-informed opioid selection  
-✔️ NSAID safety check  
-
-Clinical Impact
-
-- Standardized emergency prescribing
-- Reduced renal dosing errors
-- Avoids CYP2D6-related opioid mismatch
-- Faster time-to-analgesia
-- Precision medicine approach in acute care
 Added Value
-
-Unlike simple dose calculators, SCDAid combines:
-
-Genotype + Renal Function + Weight + Severity  
-Into one real-time clinical decision.
+Unlike simple dose calculators, SCDAid integrates:
+Genotype + Renal Function + Weight + Pain Severity
+into a single structured recommendation output to assist clinicians during acute VOC assessment.
 
 Live Demo 
 https://masheljmil123-svg.github.io/SCDAid/
