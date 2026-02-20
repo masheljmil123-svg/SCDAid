@@ -49,9 +49,10 @@ const TXT = {
     placeholderText: 'Enter inputs then click "Run Algorithm".',
     refsTitle: "References",
 
-    // NEW
+    // Phenotype prediction
     phenoPredTitle: "Phenotype Prediction (API)",
-    phenoPredHint: "Optional: use local API to predict CYP2D6 phenotype and auto-fill the field above.",
+    phenoPredHint:
+      "Optional: use local API to predict CYP2D6 phenotype and auto-fill the field above.",
     sexLabel: "Sex",
     inhibitorLabel: "CYP2D6 inhibitor",
     inhibitorHint: "Examples: strong CYP2D6 inhibitors may reduce CYP2D6 activity.",
@@ -63,6 +64,26 @@ const TXT = {
     predictApplied: "Applied to CYP2D6 phenotype.",
     predictApiDown: "API not reachable. Keep the terminal server running.",
     predictBad: "Prediction failed. Check API logs.",
+
+    // ALWAYS visible box (NEW)
+    genoBoxTitle: "If CYP2D6 genotype is unavailable",
+    genoBoxIntro:
+      "Clinical indicators suggestive of altered CYP2D6 activity (informational only; does not replace genotyping):",
+    genoBoxItems: [
+      `<b>Past response (strongest clue)</b><br>
+       • Possible UM: marked sedation/respiratory depression or severe nausea on small doses of codeine/tramadol.<br>
+       • Possible PM: no analgesic effect despite maximum recommended doses of codeine/tramadol.`,
+      `<b>Drug–drug interactions (phenoconversion)</b><br>
+       • Strong CYP2D6 inhibitors (e.g., fluoxetine, paroxetine) may make a normal genotype behave like PM.`,
+      `<b>Ethnicity/geography</b><br>
+       • Some Middle Eastern/North African populations show higher prevalence of UM alleles; use caution with first-time codeine.`,
+      `<b>Organ function (secondary modifiers)</b><br>
+       • Liver/renal impairment can amplify toxicity or mask expected response; monitor closely.`,
+      `<b>Therapeutic drug monitoring (rare)</b><br>
+       • In specialized centers, high codeine with near-zero morphine may suggest PM.`,
+    ],
+    genoBoxNote:
+      "<b>Clinical note:</b> If genotype is unknown and codeine/tramadol is being considered, prefer non-CYP2D6-dependent options and monitor closely.",
 
     pills: {
       low: "Low renal risk",
@@ -117,7 +138,7 @@ const TXT = {
     placeholderText: "ادخل البيانات ثم اضغط تشغيل الخوارزمية.",
     refsTitle: "المراجع",
 
-    // NEW
+    // Phenotype prediction
     phenoPredTitle: "تنبؤ الفينوتايب (API)",
     phenoPredHint: "اختياري: استخدمي الـ API المحلي للتنبؤ بـ CYP2D6 وتعبئة الخانة تلقائيًا.",
     sexLabel: "الجنس",
@@ -131,6 +152,26 @@ const TXT = {
     predictApplied: "تمت تعبئة الفينوتايب في الأعلى.",
     predictApiDown: "الـ API غير متاح. تأكدي السيرفر شغال في الترمنال.",
     predictBad: "فشل التنبؤ. راجعي سجلات الـ API.",
+
+    // ALWAYS visible box (NEW)
+    genoBoxTitle: "إذا كان جينوتايب CYP2D6 غير متوفر",
+    genoBoxIntro:
+      "مؤشرات سريرية قد توحي بتغيّر نشاط CYP2D6 (للتثقيف فقط ولا تغني عن الفحص الجيني):",
+    genoBoxItems: [
+      `<b>الاستجابة السابقة (أقوى مؤشر)</b><br>
+       • احتمال UM: نعاس شديد/تثبيط تنفسي أو غثيان شديد مع جرعات صغيرة من الكودايين/الترامادول.<br>
+       • احتمال PM: عدم وجود تسكين رغم الجرعات القصوى الموصى بها من الكودايين/الترامادول.`,
+      `<b>تداخلات دوائية (Phenoconversion)</b><br>
+       • مثبطات CYP2D6 القوية (مثل فلوكسيتين/باروكسيتين) قد تجعل النمط الطبيعي يتصرف كأنه PM.`,
+      `<b>العرق/الجغرافيا</b><br>
+       • بعض سكان الشرق الأوسط/شمال أفريقيا قد يكون لديهم انتشار أعلى لأليلات UM؛ الحذر مع أول استخدام للكودايين.`,
+      `<b>وظائف الأعضاء (عوامل ثانوية)</b><br>
+       • ضعف الكبد/الكلى قد يزيد السمية أو يخفي الاستجابة المتوقعة؛ راقبي عن قرب.`,
+      `<b>المراقبة العلاجية (نادر)</b><br>
+       • في مراكز متخصصة: كودايين مرتفع مع مورفين شبه صفري قد يوحي بـ PM.`,
+    ],
+    genoBoxNote:
+      "<b>ملاحظة سريرية:</b> إذا كان الجينوتايب غير معروف ويتم التفكير بالكودايين/الترامادول، فالأفضل تفضيل خيارات غير معتمدة على CYP2D6 مع مراقبة لصيقة.",
 
     pills: {
       low: "خطورة كلوية منخفضة",
@@ -276,7 +317,6 @@ function safetyLines(drug, inputs) {
 
   let lines = map[drug] ? [...map[drug]] : [];
 
-  // Dynamic cautions
   if ((drug === "NSAIDs" || drug === "Ketorolac") && renal === "high") {
     lines.unshift("RENAL HIGH RISK: avoid NSAIDs when eGFR <30 or AKI suspected.");
   }
@@ -354,13 +394,11 @@ function buildPlan(inputs) {
   const options = [];
   const avoid = [];
 
-  // Adjunct acetaminophen
   meds.push({
     name: "Acetaminophen",
     text: "Acetaminophen: 650–1000 mg PO q6–8 h (or 1 g IV q6 h). Max 3–4 g/day.",
   });
 
-  // NSAID if allowed
   const nsaidAllowed = allowNSAID(inputs, renalRisk);
   if (nsaidAllowed) {
     const n = chooseNSAIDName(inputs.severity);
@@ -382,7 +420,6 @@ function buildPlan(inputs) {
     });
   }
 
-  // Ketamine for severe + opioid tolerant
   if (inputs.severity === "severe" && inputs.opioidTol) {
     meds.push({
       name: "Ketamine",
@@ -390,7 +427,6 @@ function buildPlan(inputs) {
     });
   }
 
-  // PO transition option
   if (canOfferOxycodone(inputs, renalRisk)) {
     options.push("If stable and tolerating PO: consider oxycodone IR 5–10 mg PO q4–6 h (avoid/very low dose if eGFR <30).");
   }
@@ -472,7 +508,6 @@ function setPredictStatus({ predicted, confidence, probabilities, note, mode }) 
     return;
   }
 
-  // success
   const confClass = confidence === "high" ? "high" : (confidence === "medium" ? "medium" : "low");
   const probsText = probabilities
     ? `PM ${Math.round((probabilities.PM || 0) * 100)}% · IM ${Math.round((probabilities.IM || 0) * 100)}% · NM ${Math.round((probabilities.NM || 0) * 100)}% · UM ${Math.round((probabilities.UM || 0) * 100)}%`
@@ -534,14 +569,10 @@ async function predictPhenotype() {
 
     const out = await res.json();
 
-    // Apply to tool:
-    // - set genotype availability to Known
-    // - enable phenotype select
-    // - set predicted value
     $("genoAvail").value = "known";
     $("cyp2d6Input").disabled = false;
+
     if (["PM", "IM", "NM", "UM", "EM"].includes(out.predicted)) {
-      // tool uses EM label, API returns NM -> map NM to EM
       const mapped = out.predicted === "NM" ? "EM" : out.predicted;
       $("cyp2d6Input").value = mapped;
     }
@@ -666,7 +697,7 @@ function setLang(newLang) {
   $("resultsTitle").textContent = t.resultsTitle;
   $("refsTitle").textContent = t.refsTitle;
 
-  // NEW labels
+  // Prediction labels
   $("phenoPredTitle").textContent = t.phenoPredTitle;
   $("phenoPredHint").textContent = t.phenoPredHint;
   $("sexLabel").textContent = t.sexLabel;
@@ -676,14 +707,22 @@ function setLang(newLang) {
   $("tramadolRespLabel").textContent = t.tramadolRespLabel;
   $("predictBtn").textContent = t.predictBtn;
 
-  // If results are empty, refresh placeholder
+  // ALWAYS visible genotype box content (NEW)
+  if ($("genoBoxTitle")) $("genoBoxTitle").textContent = t.genoBoxTitle;
+  if ($("genoBoxIntro")) $("genoBoxIntro").textContent = t.genoBoxIntro;
+
+  if ($("genoBoxList")) {
+    $("genoBoxList").innerHTML = (t.genoBoxItems || []).map(x => `<li>${x}</li>`).join("");
+  }
+  if ($("genoBoxNote")) $("genoBoxNote").innerHTML = t.genoBoxNote;
+
+  // placeholder
   if ($("results").querySelector(".placeholder")) {
     $("placeholderText").textContent = t.placeholderText;
   }
 
   $("langToggle").textContent = lang === "AR" ? "EN" : "AR";
 
-  // refresh predict status text
   setPredictStatus({ mode: "idle" });
 }
 
@@ -700,7 +739,6 @@ function run() {
   const opioid = chooseOpioid(plan.renalRisk, inputs.morphineAllergy);
   const ivDose = doseIVOpioid(opioid, inputs.severity, inputs.weightKg);
 
-  // Safety blocks only for meds in plan + primary opioid
   const safetyNames = new Set([opioid]);
   plan.meds.forEach(m => safetyNames.add(m.name));
 
@@ -736,7 +774,6 @@ function reset() {
   $("cyp2d6Input").value = "EM";
   $("cyp2d6Input").disabled = false;
 
-  // NEW reset
   if ($("sexInput")) $("sexInput").value = "F";
   if ($("inhibitorInput")) $("inhibitorInput").value = "no";
   if ($("codeineRespInput")) $("codeineRespInput").value = "ineffective";
@@ -766,7 +803,6 @@ function init() {
   $("runBtn").addEventListener("click", run);
   $("resetBtn").addEventListener("click", reset);
 
-  // NEW: predict button
   $("predictBtn").addEventListener("click", predictPhenotype);
 
   $("genoAvail").addEventListener("change", () => {
