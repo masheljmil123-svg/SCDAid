@@ -187,3 +187,9 @@ a:hover{text-decoration:underline}
   border:1px solid rgba(29,78,216,.18);
   color:#0b2a6f;
 }
+
+.container {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
