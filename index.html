@@ -1,220 +1,205 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" dir="ltr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>SCDAid</title>
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
-  <header class="topbar">
+  <div class="topbar">
     <div class="brand">
-      <img src="Logo.png" alt="SCDAid" class="logo" onerror="this.style.display='none'">
+      <div class="logo">SC</div>
       <div>
-        <div class="brand-title">SCDAid</div>
-        <div class="brand-subtitle" id="subtitle">Genotype & Renal-Aware VOC Pain Decision Tool</div>
+        <div id="titleText" class="title">SCDAid</div>
+        <div id="subtitleText" class="subtitle">...</div>
       </div>
     </div>
 
-    <div class="topbar-actions">
-      <button id="langToggle" class="btn ghost">AR</button>
-      <a class="btn ghost" href="#refs">References</a>
-    </div>
-  </header>
+    <button id="langToggle" class="btn ghost">AR</button>
+  </div>
 
-  <main class="container">
-    <section class="grid">
-      <!-- LEFT: Inputs -->
+  <main class="wrap">
+    <section class="left">
       <div class="card">
-        <h2 id="inputsTitle">Inputs</h2>
-
-        <div class="field">
-          <label id="ageLabel" for="age">Age</label>
-          <input id="age" type="number" min="0" placeholder="e.g., 24" />
+        <div class="cardHeader">
+          <h2 id="patientInputsTitle">Patient Inputs</h2>
         </div>
 
-        <div class="field">
-          <label id="weightLabel" for="weight">Weight (kg)</label>
-          <input id="weight" type="number" min="1" step="0.1" placeholder="e.g., 70" />
-        </div>
+        <div class="grid">
+          <div class="field">
+            <label id="ageLabel" for="ageInput">Age (years) *</label>
+            <input id="ageInput" type="number" min="0" placeholder="e.g., 24" />
+          </div>
 
-        <div class="field">
-          <label id="egfrLabel" for="egfr">eGFR (mL/min/1.73m²)</label>
-          <input id="egfr" type="number" min="0" step="1" placeholder="e.g., 110" />
-          <div class="hint" id="egfrHint">Used for renal dose adjustment and safety flags.</div>
-        </div>
-
-        <div class="field">
-          <label id="crisesLabel" for="crisesPerYear">Pain crises/year (optional)</label>
-          <input id="crisesPerYear" type="number" min="0" placeholder="e.g., 4" />
-        </div>
-
-        <div class="field">
-          <label id="severityLabel" for="severity">Pain severity</label>
-          <select id="severity">
-            <option value="mild">Mild</option>
-            <option value="moderate" selected>Moderate</option>
-            <option value="severe">Severe</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label id="genoAvailLabel" for="genoAvail">CYP2D6 genotype availability</label>
-          <select id="genoAvail">
-            <option value="known" selected>Known</option>
-            <option value="unknown">Unknown</option>
-          </select>
-          <div class="hint" id="genoAvailHint">If unknown, tool avoids CYP2D6-dependent opioids.</div>
-        </div>
-
-        <div class="field">
-          <label id="cypLabel" for="cyp2d6">CYP2D6 phenotype</label>
-          <select id="cyp2d6">
-            <option value="PM">Poor (PM)</option>
-            <option value="IM">Intermediate (IM)</option>
-            <option value="NM" selected>Normal (NM)</option>
-            <option value="UM">Ultrarapid (UM)</option>
-          </select>
-        </div>
-
-        <!-- ✅ ALWAYS VISIBLE EDUCATIONAL BOX -->
-        <div class="field">
-          <details id="genoInfoBox" class="geno-info" open>
-            <summary>
-              <span id="genoInfoTitle">If CYP2D6 genotype is unavailable</span>
-            </summary>
-
-            <div class="geno-info-body">
-              <div id="genoInfoIntro" class="geno-info-intro">
-                Clinical indicators suggestive of altered CYP2D6 activity (informational only; does not replace genotyping):
-              </div>
-
-              <ol class="geno-info-list">
-                <li>
-                  <div class="geno-info-head" id="genoInfo1Title">Past response (strongest clue):</div>
-                  <ul>
-                    <li id="genoInfo1a">Possible UM: marked sedation/respiratory depression or severe nausea on small doses of codeine/tramadol.</li>
-                    <li id="genoInfo1b">Possible PM: no analgesic effect despite maximum recommended doses of codeine/tramadol.</li>
-                  </ul>
-                </li>
-
-                <li>
-                  <div class="geno-info-head" id="genoInfo2Title">Drug–drug interactions (phenoconversion):</div>
-                  <ul>
-                    <li id="genoInfo2a">Strong CYP2D6 inhibitors (e.g., fluoxetine, paroxetine) may make a normal genotype behave like PM.</li>
-                  </ul>
-                </li>
-
-                <li>
-                  <div class="geno-info-head" id="genoInfo3Title">Ethnicity/geography:</div>
-                  <ul>
-                    <li id="genoInfo3a">Some Middle Eastern/North African populations show higher prevalence of UM alleles; use caution with first-time codeine.</li>
-                  </ul>
-                </li>
-
-                <li>
-                  <div class="geno-info-head" id="genoInfo4Title">Organ function (secondary modifiers):</div>
-                  <ul>
-                    <li id="genoInfo4a">Liver/renal impairment can amplify toxicity or mask expected response; monitor closely.</li>
-                  </ul>
-                </li>
-
-                <li>
-                  <div class="geno-info-head" id="genoInfo5Title">Therapeutic drug monitoring (rare):</div>
-                  <ul>
-                    <li id="genoInfo5a">In specialized centers, high codeine with near-zero morphine may suggest PM.</li>
-                  </ul>
-                </li>
-              </ol>
-
-              <div class="geno-info-note">
-                <div class="geno-info-head" id="genoInfoNoteTitle">Clinical note:</div>
-                <div id="genoInfoNoteBody">If genotype is unknown and codeine/tramadol is being considered, prefer non–CYP2D6-dependent options and monitor closely.</div>
-              </div>
+          <div class="field">
+            <label id="weightLabel" for="weightInput">Weight *</label>
+            <div class="row">
+              <input id="weightInput" type="number" min="0" placeholder="e.g., 70" />
+              <select id="weightUnit">
+                <option value="kg">kg</option>
+                <option value="lb">lb</option>
+              </select>
             </div>
-          </details>
+            <div id="weightHint" class="hint">...</div>
+          </div>
+
+          <div class="field">
+            <label id="egfrLabel" for="gfrInput">eGFR *</label>
+            <input id="gfrInput" type="number" min="0" placeholder="e.g., 110" />
+            <div id="egfrHint" class="hint">...</div>
+          </div>
+
+          <div class="field">
+            <label id="doseUnitLabel" for="doseUnit">Output Dose Unit</label>
+            <select id="doseUnit">
+              <option value="mg">mg</option>
+              <option value="mcg">mcg</option>
+              <option value="g">g</option>
+            </select>
+            <div id="doseUnitHint" class="hint">...</div>
+          </div>
+
+          <div class="field">
+            <label id="crisesLabel" for="crisesInput">Pain crises/year (optional)</label>
+            <input id="crisesInput" type="number" min="0" placeholder="e.g., 4" />
+          </div>
+
+          <div class="field">
+            <label id="severityLabel" for="severityInput">Pain severity *</label>
+            <select id="severityInput">
+              <option value="mild">Mild</option>
+              <option value="moderate" selected>Moderate</option>
+              <option value="severe">Severe</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label id="genoAvailLabel" for="genoAvail">CYP2D6 genotype availability</label>
+            <select id="genoAvail">
+              <option value="known" selected>Known</option>
+              <option value="unknown">Unknown</option>
+            </select>
+            <div id="genoAvailHint" class="hint">...</div>
+          </div>
+
+          <div class="field">
+            <label id="cypLabel" for="cyp2d6Input">CYP2D6 phenotype</label>
+            <select id="cyp2d6Input">
+              <option value="PM">Poor (PM)</option>
+              <option value="IM">Intermediate (IM)</option>
+              <option value="EM" selected>Normal (NM/EM)</option>
+              <option value="UM">Ultrarapid (UM)</option>
+            </select>
+          </div>
         </div>
 
+        <!-- Phenotype Prediction (API) -->
         <div class="divider"></div>
 
-        <h3 id="mlTitle">Phenotype Prediction (API)</h3>
-        <div class="hint" id="mlHint">Optional: use local API to predict CYP2D6 phenotype and auto-fill the field above.</div>
+        <div class="box">
+          <h3 id="phenoPredTitle">Phenotype Prediction (API)</h3>
+          <div id="phenoPredHint" class="hint">...</div>
 
-        <div class="field">
-          <label id="sexLabel" for="sex">Sex</label>
-          <select id="sex">
-            <option value="F" selected>F</option>
-            <option value="M">M</option>
-          </select>
+          <div class="grid" style="margin-top:12px;">
+            <div class="field">
+              <label id="sexLabel" for="sexInput">Sex</label>
+              <select id="sexInput">
+                <option value="F" selected>F</option>
+                <option value="M">M</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label id="inhibitorLabel" for="inhibitorInput">CYP2D6 inhibitor</label>
+              <select id="inhibitorInput">
+                <option value="no" selected>No</option>
+                <option value="yes">Yes</option>
+              </select>
+              <div id="inhibitorHint" class="hint">...</div>
+            </div>
+
+            <div class="field">
+              <label id="codeineRespLabel" for="codeineRespInput">Prior codeine response</label>
+              <select id="codeineRespInput">
+                <option value="ineffective" selected>Ineffective</option>
+                <option value="effective">Effective</option>
+                <option value="adverse">Adverse effects</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label id="tramadolRespLabel" for="tramadolRespInput">Prior tramadol response</label>
+              <select id="tramadolRespInput">
+                <option value="ineffective" selected>Ineffective</option>
+                <option value="effective">Effective</option>
+                <option value="adverse">Adverse effects</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:12px; gap:10px;">
+            <button id="predictBtn" class="btn">Predict Phenotype</button>
+            <div id="predictStatus" class="predictStatus"></div>
+          </div>
         </div>
 
-        <div class="field">
-          <label id="inhibLabel" for="cyp2d6Inhibitor">CYP2D6 inhibitor</label>
-          <select id="cyp2d6Inhibitor">
-            <option value="no" selected>No</option>
-            <option value="yes">Yes</option>
-          </select>
-          <div class="hint" id="inhibHint">Examples: strong CYP2D6 inhibitors may reduce CYP2D6 activity.</div>
-        </div>
-
-        <div class="field">
-          <label id="codeineLabel" for="priorCodeine">Prior codeine response</label>
-          <select id="priorCodeine">
-            <option value="effective">Effective</option>
-            <option value="ineffective" selected>Ineffective</option>
-            <option value="adverse">Adverse effects</option>
-            <option value="unknown">Unknown</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label id="tramadolLabel" for="priorTramadol">Prior tramadol response</label>
-          <select id="priorTramadol">
-            <option value="effective">Effective</option>
-            <option value="ineffective" selected>Ineffective</option>
-            <option value="adverse">Adverse effects</option>
-            <option value="unknown">Unknown</option>
-          </select>
-        </div>
-
-        <div class="row">
-          <button id="predictBtn" class="btn">Predict Phenotype</button>
-          <span id="mlBadge" class="badge hidden"></span>
-          <span id="confBadge" class="badge hidden"></span>
-        </div>
-
-        <div id="mlDetails" class="small muted"></div>
-
+        <!-- ALWAYS visible genotype-unavailable guidance box -->
         <div class="divider"></div>
 
-        <div class="checkboxes">
-          <label><input type="checkbox" id="opioidTolerant"> <span id="opioidTolLabel">Opioid tolerant</span></label>
-          <label><input type="checkbox" id="sedatives"> <span id="sedLabel">Concurrent sedatives</span></label>
-          <label><input type="checkbox" id="respRisk"> <span id="respLabel">Respiratory risk</span></label>
-          <label><input type="checkbox" id="acsRisk"> <span id="acsLabel">Suspected ACS</span></label>
-          <label><input type="checkbox" id="morphAllergy"> <span id="allergyLabel">Morphine allergy</span></label>
+        <div class="box infoBox">
+          <h3 id="genoBoxTitle">If CYP2D6 genotype is unavailable</h3>
+          <div id="genoBoxIntro" class="hint" style="margin-top:6px;">...</div>
+
+          <ol id="genoBoxList" class="ol">
+            <!-- filled by app.js (language toggle) -->
+          </ol>
+
+          <div class="note" id="genoBoxNote">...</div>
         </div>
 
-        <div class="row">
+        <!-- flags -->
+        <div class="divider"></div>
+
+        <div class="checks">
+          <label class="chk"><input id="opioidTol" type="checkbox" /> <span id="opioidTolLabel">Opioid tolerant</span></label>
+          <label class="chk"><input id="sedatives" type="checkbox" /> <span id="sedativesLabel">Concurrent sedatives</span></label>
+          <label class="chk"><input id="respRisk" type="checkbox" /> <span id="respRiskLabel">Respiratory risk</span></label>
+          <label class="chk"><input id="suspectedACS" type="checkbox" /> <span id="acsLabel">Suspected ACS</span></label>
+          <label class="chk"><input id="morphineAllergy" type="checkbox" /> <span id="morphineAllergyLabel">Morphine allergy</span></label>
+        </div>
+
+        <div class="actions">
           <button id="runBtn" class="btn primary">Run Algorithm</button>
           <button id="resetBtn" class="btn ghost">Reset</button>
         </div>
 
-        <div class="disclaimer" id="disclaimer">
-          Educational prototype only. Not a substitute for clinical judgment.
-        </div>
+        <div id="disclaimerText" class="disclaimer">Educational prototype only…</div>
       </div>
 
-      <!-- RIGHT: Output -->
-      <div class="card">
-        <h2 id="outputTitle">Output</h2>
-        <div id="output" class="output"></div>
+      <div class="card refs">
+        <div class="cardHeader">
+          <h2 id="refsTitle">References</h2>
+        </div>
+        <ul class="refList">
+          <li><a id="mohLink" target="_blank" rel="noreferrer">Saudi MOH Protocol</a></li>
+          <li><a id="cpicLink" target="_blank" rel="noreferrer">CPIC CYP2D6</a></li>
+          <li><a id="ashLink" target="_blank" rel="noreferrer">ASH VOC Guideline</a></li>
+          <li><a id="owsianyLink" target="_blank" rel="noreferrer">Owsiany et al.</a></li>
+        </ul>
       </div>
     </section>
 
-    <section id="refs" class="card refs">
-      <h2 id="refsTitle">References</h2>
-      <ul id="refsList"></ul>
+    <section class="right">
+      <div class="card">
+        <div class="cardHeader">
+          <h2 id="resultsTitle">Results</h2>
+        </div>
+        <div id="results">
+          <div id="placeholderText" class="placeholder">Enter inputs then click "Run Algorithm".</div>
+        </div>
+      </div>
     </section>
   </main>
 
