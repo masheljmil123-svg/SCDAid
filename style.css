@@ -193,3 +193,69 @@ a:hover{text-decoration:underline}
   margin: 40px auto;
   padding: 0 20px;
 }
+/* =========================
+   NEW: Genetics mini card + nephropathy checkbox polish
+   ========================= */
+
+.geneticsCard{
+  grid-column: 1 / -1;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg,#ffffff,#fafcff);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.geneticsCard .miniTitle{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.geneticsCard .miniTitle span{
+  font-size:12px;
+  font-weight:800;
+}
+
+.badgesRow{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.badge{
+  font-size:11px;
+  padding:6px 10px;
+  border-radius:999px;
+  font-weight:800;
+  border:1px solid var(--line);
+  background: rgba(15,23,42,.04);
+  color: var(--text);
+}
+
+.badge.ok{background:rgba(22,163,74,.10);border-color:rgba(22,163,74,.25);color:var(--ok)}
+.badge.warn{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.25);color:#92400e}
+.badge.danger{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.25);color:var(--danger)}
+.badge.info{background:rgba(29,78,216,.10);border-color:rgba(29,78,216,.25);color:var(--blue)}
+
+.miniHint{
+  margin-top:8px;
+  font-size:11px;
+  color: var(--muted);
+  line-height:1.35;
+}
+
+/* Make full width fields inside grid when needed */
+.field.full{
+  grid-column: 1 / -1;
+}
+
+/* Slightly nicer checkbox spacing (works with your .chk) */
+.chk .subhint{
+  display:block;
+  margin-top:2px;
+  font-size:11px;
+  color: var(--muted);
+  line-height:1.25;
+}
