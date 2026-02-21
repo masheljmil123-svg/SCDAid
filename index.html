@@ -93,6 +93,32 @@
               <option value="UM">Ultrarapid (UM)</option>
             </select>
           </div>
+
+          <!-- ✅ NEW: CYP2D6 Activity Score (under phenotype) -->
+          <div class="field">
+            <label for="cyp2d6_activity_score">CYP2D6 activity score</label>
+            <input id="cyp2d6_activity_score" type="number" min="0" step="0.25" placeholder="e.g., 2.0" />
+            <div class="hint">If entered, phenotype will be auto-classified (CPIC thresholds).</div>
+          </div>
+
+          <!-- ✅ NEW: Optional Gene (choose second gene) -->
+          <div class="field">
+            <label for="optional_gene_select">Optional gene (choose one)</label>
+            <select id="optional_gene_select">
+              <option value="" selected>None</option>
+              <option value="OPRM1">OPRM1 (A118G)</option>
+              <option value="COMT">COMT (Val158Met)</option>
+            </select>
+            <div class="hint">Optional modifiers (informational only).</div>
+          </div>
+
+          <!-- ✅ NEW: Optional Gene Genotype (auto-filled by app.js on selection) -->
+          <div class="field">
+            <label for="optional_gene_genotype">Genotype</label>
+            <select id="optional_gene_genotype"></select>
+            <div class="hint">Will populate after choosing an optional gene above.</div>
+          </div>
+
         </div>
 
         <!-- Phenotype Prediction (API) -->
@@ -168,6 +194,12 @@
           <label class="chk"><input id="respRisk" type="checkbox" /> <span id="respRiskLabel">Respiratory risk</span></label>
           <label class="chk"><input id="suspectedACS" type="checkbox" /> <span id="acsLabel">Suspected ACS</span></label>
           <label class="chk"><input id="morphineAllergy" type="checkbox" /> <span id="morphineAllergyLabel">Morphine allergy</span></label>
+
+          <!-- ✅ NEW: Nephropathy flag (under flags) -->
+          <label class="chk">
+            <input id="flag_nephropathy" type="checkbox" />
+            <span>SCD nephropathy (albuminuria/proteinuria or CKD)</span>
+          </label>
         </div>
 
         <div class="actions">
