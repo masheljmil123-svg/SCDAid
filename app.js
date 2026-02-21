@@ -4,6 +4,9 @@
 // - Output dose unit: mg/mcg/g with alternative in parentheses
 // - Safety blocks show ONLY for meds that appear in plan + primary opioid
 // - Adds phenotype prediction call to local API (FastAPI) and auto-fills CYP2D6 phenotype
+// - NEW: CYP2D6 Activity Score -> auto phenotype (CPIC thresholds)
+// - NEW: Optional gene selector (OPRM1/COMT) informational only
+// - NEW: Nephropathy flag -> add-ons + tighter renal safety
 
 const $ = (id) => document.getElementById(id);
 
@@ -94,6 +97,8 @@ const TXT = {
     },
     sections: {
       renal: "Renal Stratification",
+      genetics: "Genetics Summary",
+      neph: "Nephropathy add-ons",
       dosing: "Adult IV Opioid Starting Dose",
       plan: "Recommended Plan",
       options: "Optional Next Steps",
@@ -182,6 +187,8 @@ const TXT = {
     },
     sections: {
       renal: "تصنيف الكلى",
+      genetics: "ملخص الجينات",
+      neph: "إضافات النيفروباثي",
       dosing: "جرعة بداية IV للكبار",
       plan: "الخطة المقترحة",
       options: "خيارات إضافية",
@@ -248,6 +255,40 @@ function formatDoseMultiFromMg(mg) {
   return `${mg.toFixed(2)} mg`;
 }
 
+// ===== NEW: CYP2D6 Activity Score -> phenotype (CPIC thresholds) =====
+function cyp2d6PhenotypeFromAS(as) {
+  if (as === null || Number.isNaN(as)) return null;
+
+  // CPIC thresholds:
+  // PM = 0
+  // IM >0 and <1.25
+  // NM/EM 1.25–2.25
+  // UM >2.25
+  if (as === 0) return "PM";
+  if (as > 0 && as < 1.25) return "IM";
+  if (as >= 1.25 && as <= 2.25) return "EM";
+  if (as > 2.25) return "UM";
+  return "EM";
+}
+
+function cyp2d6Label(ph) {
+  // For display in results
+  const map = { PM: "Poor (PM)", IM: "Intermediate (IM)", EM: "Normal (NM/EM)", UM: "Ultrarapid (UM)" };
+  return map[ph] || ph;
+}
+
+// ===== NEW: Optional gene informational text =====
+function optionalGeneNote(gene, genotype) {
+  if (!gene) return null;
+  if (gene === "OPRM1") {
+    return `OPRM1 ${genotype}: may be associated with interindividual variability in opioid response. Use for monitoring/titration context only.`;
+  }
+  if (gene === "COMT") {
+    return `COMT ${genotype}: may influence pain sensitivity/opioid requirements. Exploratory—do not use as a hard rule for opioid selection.`;
+  }
+  return null;
+}
+
 // ---------- Clinical blocks ----------
 function generalMonitoring() {
   return [
@@ -262,7 +303,8 @@ function safetyLines(drug, inputs) {
   const eGFR = inputs.eGFR;
   const renal = riskRenal(eGFR);
   const genoUnknown = inputs.genoAvail === "unknown";
-  const ph = inputs.phenotype;
+  const ph = inputs.phenotype; // PM/IM/EM/UM
+  const neph = inputs.nephropathy;
 
   const map = {
     Acetaminophen: [
@@ -320,11 +362,19 @@ function safetyLines(drug, inputs) {
   if ((drug === "NSAIDs" || drug === "Ketorolac") && renal === "high") {
     lines.unshift("RENAL HIGH RISK: avoid NSAIDs when eGFR <30 or AKI suspected.");
   }
+
+  // NEW: nephropathy strengthens NSAID safety
+  if ((drug === "NSAIDs" || drug === "Ketorolac") && neph) {
+    lines.unshift("NEPHROPATHY FLAG: avoid/minimize NSAIDs when possible due to increased renal risk; prefer non-NSAID options.");
+  }
+
   if (drug === "Morphine" && (renal === "moderate" || renal === "high")) {
     lines.unshift("Renal caution: consider hydromorphone or fentanyl instead of morphine.");
   }
+
+  // Your original caution for oxycodone
   if (drug === "Oxycodone" && (genoUnknown || ph === "PM" || ph === "UM")) {
-    lines.unshift("CYP2D6 variability may affect efficacy and toxicity. Use caution if genotype unknown or PM UM.");
+    lines.unshift("CYP2D6 variability may affect efficacy and toxicity. Use caution if genotype unknown or PM/UM.");
   }
 
   return lines;
@@ -373,8 +423,10 @@ function chooseOpioid(renalRisk, morphineAllergy) {
   return "Morphine";
 }
 
+// NEW: nephropathy automatically tightens NSAID use
 function allowNSAID(inputs, renalRisk) {
   const renalOk = renalRisk === "low" || renalRisk === "moderate";
+  if (inputs.nephropathy) return false;
   return renalOk && !inputs.respRisk && !inputs.suspectedACS;
 }
 
@@ -393,6 +445,7 @@ function buildPlan(inputs) {
   const meds = [];
   const options = [];
   const avoid = [];
+  const nephAddons = [];
 
   meds.push({
     name: "Acetaminophen",
@@ -416,7 +469,9 @@ function buildPlan(inputs) {
   } else {
     meds.push({
       name: "NSAIDs",
-      text: "NSAIDs: avoid due to renal/ACS/respiratory risk.",
+      text: inputs.nephropathy
+        ? "NSAIDs: avoid/minimize due to nephropathy flag (renal protection)."
+        : "NSAIDs: avoid due to renal/ACS/respiratory risk.",
     });
   }
 
@@ -431,22 +486,35 @@ function buildPlan(inputs) {
     options.push("If stable and tolerating PO: consider oxycodone IR 5–10 mg PO q4–6 h (avoid/very low dose if eGFR <30).");
   }
 
+  // NEW: Nephropathy add-on recommendations
+  if (inputs.nephropathy) {
+    nephAddons.push("Consider ACEi/ARB if albuminuria/proteinuria is present (per local protocol).");
+    nephAddons.push("Monitor serum creatinine and potassium after ACEi/ARB initiation or dose changes.");
+    nephAddons.push("Avoid/minimize nephrotoxins when possible (especially NSAIDs), particularly if renal function is impaired.");
+  }
+
   avoid.push("Meperidine: strongly not recommended due to neurotoxicity (normeperidine accumulation).");
   avoid.push("Codeine & tramadol: not recommended in acute VOC due to CYP2D6 variability and unpredictable efficacy/safety. Consider only if no IV options and genotype known.");
   if (renalRisk === "high") {
     avoid.push("Renal high risk (eGFR <30 or AKI suspected): avoid NSAIDs and avoid morphine metabolite accumulation.");
   }
+  if (inputs.nephropathy) {
+    avoid.push("Nephropathy: avoid/minimize NSAIDs when possible; prioritize renal-safe options and monitoring.");
+  }
 
-  return { renalRisk, meds, options, avoid, nsaidAllowed };
+  return { renalRisk, meds, options, avoid, nsaidAllowed, nephAddons };
 }
 
-function safetyStops(eGFR) {
+function safetyStops(eGFR, nephropathy) {
   const lines = [];
   lines.push("If RR <12 hold opioid. If RR <10 or oversedation give naloxone.");
   lines.push("If SpO2 <92 or suspected ACS urgent evaluation and oxygen.");
   lines.push("If creatinine rises >=0.3 mg/dL within 48 h stop NSAIDs.");
   if (eGFR !== null && eGFR < 30) {
     lines.push("Renal: avoid NSAIDs and avoid morphine. Prefer fentanyl or hydromorphone.");
+  }
+  if (nephropathy) {
+    lines.push("Nephropathy: avoid/minimize NSAIDs when possible; monitor renal function closely with any nephrotoxic exposure.");
   }
   return lines;
 }
@@ -461,7 +529,28 @@ function readInputs() {
   const eGFR = num($("gfrInput")?.value);
 
   const genoAvail = $("genoAvail")?.value || "known";
-  const phenotype = genoAvail === "unknown" ? "EM" : ($("cyp2d6Input")?.value || "EM");
+
+  // Existing phenotype input (PM/IM/EM/UM)
+  let phenotype = genoAvail === "unknown" ? "EM" : ($("cyp2d6Input")?.value || "EM");
+
+  // NEW: Activity Score overrides phenotype if provided
+  const activityScore = num($("cyp2d6_activity_score")?.value);
+  if (activityScore !== null) {
+    const phFromAS = cyp2d6PhenotypeFromAS(activityScore);
+    if (phFromAS) phenotype = phFromAS;
+
+    // If user entered AS, treat as effectively "known phenotype"
+    // (we don't force genoAvail dropdown to change here to avoid UI surprises)
+    if ($("cyp2d6Input")) $("cyp2d6Input").value = phenotype;
+    if ($("cyp2d6Input")) $("cyp2d6Input").disabled = false;
+  }
+
+  // NEW: Optional gene selection
+  const optionalGene = $("optional_gene_select")?.value || "";
+  const optionalGenotype = $("optional_gene_genotype")?.value || "";
+
+  // NEW: Nephropathy flag
+  const nephropathy = !!$("flag_nephropathy")?.checked;
 
   return {
     age,
@@ -470,7 +559,12 @@ function readInputs() {
     crises: num($("crisesInput")?.value),
     severity: $("severityInput")?.value || "moderate",
     genoAvail,
-    phenotype,
+    phenotype, // PM/IM/EM/UM
+    activityScore,
+    optionalGene,
+    optionalGenotype,
+    nephropathy,
+
     opioidTol: !!$("opioidTol")?.checked,
     sedatives: !!$("sedatives")?.checked,
     respRisk: !!$("respRisk")?.checked,
@@ -575,6 +669,10 @@ async function predictPhenotype() {
     if (["PM", "IM", "NM", "UM", "EM"].includes(out.predicted)) {
       const mapped = out.predicted === "NM" ? "EM" : out.predicted;
       $("cyp2d6Input").value = mapped;
+
+      // NEW: if API applied phenotype, clear AS field to avoid conflict (optional behavior)
+      // Comment this out if you want to keep AS untouched.
+      if ($("cyp2d6_activity_score")) $("cyp2d6_activity_score").value = "";
     }
 
     setPredictStatus({
@@ -611,12 +709,46 @@ function render(model) {
     </div>
   `).join("");
 
+  // NEW: Genetics summary box (only if something was entered)
+  const geneticsLines = [];
+  if (model.activityScore !== null) {
+    geneticsLines.push(`CYP2D6 Activity Score: <b>${model.activityScore.toFixed(2)}</b> → <b>${cyp2d6Label(model.phenotype)}</b>`);
+  } else {
+    geneticsLines.push(`CYP2D6 phenotype: <b>${cyp2d6Label(model.phenotype)}</b>`);
+  }
+
+  if (model.optionalGene) {
+    const note = optionalGeneNote(model.optionalGene, model.optionalGenotype || "-");
+    if (note) geneticsLines.push(note);
+  }
+
+  const geneticsBox = `
+    <div class="box">
+      <h3>${t.sections.genetics}</h3>
+      ${ul(geneticsLines)}
+    </div>
+  `;
+
+  // NEW: Nephropathy add-ons box
+  const nephBox = model.nephropathy && model.nephAddons?.length
+    ? `
+      <div class="box">
+        <h3>${t.sections.neph}</h3>
+        ${ul(model.nephAddons)}
+      </div>
+    `
+    : "";
+
   const html = `
     <div class="box">
       <h3>${t.sections.renal}</h3>
       <div class="pills">${renalPill}<span class="pill info">NSAID</span>${nsaidPill}</div>
       <div class="hint" style="margin-top:8px;">eGFR: <b>${model.eGFR}</b> mL/min/1.73m²</div>
+      ${model.nephropathy ? `<div class="hint" style="margin-top:6px;"><b>Nephropathy flag:</b> ON</div>` : ""}
     </div>
+
+    ${geneticsBox}
+    ${nephBox}
 
     <div class="box">
       <h3>${t.sections.dosing}</h3>
@@ -758,7 +890,15 @@ function run() {
     avoid: plan.avoid,
     monitoring: generalMonitoring(),
     safetyBlocks,
-    stops: safetyStops(inputs.eGFR),
+    stops: safetyStops(inputs.eGFR, inputs.nephropathy),
+
+    // NEW: carry forward genetics + nephropathy info to Results
+    phenotype: inputs.phenotype,
+    activityScore: inputs.activityScore,
+    optionalGene: inputs.optionalGene,
+    optionalGenotype: inputs.optionalGenotype,
+    nephropathy: inputs.nephropathy,
+    nephAddons: plan.nephAddons,
   };
 
   render(model);
@@ -773,6 +913,16 @@ function reset() {
   $("genoAvail").value = "known";
   $("cyp2d6Input").value = "EM";
   $("cyp2d6Input").disabled = false;
+
+  // NEW: clear activity score
+  if ($("cyp2d6_activity_score")) $("cyp2d6_activity_score").value = "";
+
+  // NEW: clear optional gene
+  if ($("optional_gene_select")) $("optional_gene_select").value = "";
+  if ($("optional_gene_genotype")) $("optional_gene_genotype").innerHTML = "";
+
+  // NEW: clear nephropathy flag
+  if ($("flag_nephropathy")) $("flag_nephropathy").checked = false;
 
   if ($("sexInput")) $("sexInput").value = "F";
   if ($("inhibitorInput")) $("inhibitorInput").value = "no";
@@ -792,6 +942,51 @@ function initLinks() {
   $("owsianyLink").href = LINKS.OWSIANY;
 }
 
+// NEW: init optional gene dropdown options (only if HTML exists)
+function initOptionalGeneUI() {
+  const geneSel = $("optional_gene_select");
+  const genoSel = $("optional_gene_genotype");
+  if (!geneSel || !genoSel) return;
+
+  function setOptions(list) {
+    genoSel.innerHTML = "";
+    list.forEach(v => {
+      const opt = document.createElement("option");
+      opt.value = v;
+      opt.textContent = v;
+      genoSel.appendChild(opt);
+    });
+  }
+
+  geneSel.addEventListener("change", () => {
+    const g = geneSel.value;
+    if (!g) {
+      genoSel.innerHTML = "";
+      return;
+    }
+    if (g === "OPRM1") setOptions(["AA","AG","GG"]);
+    if (g === "COMT") setOptions(["Val/Val","Val/Met","Met/Met"]);
+  });
+}
+
+function initActivityScoreUI() {
+  const asInput = $("cyp2d6_activity_score");
+  const phenoSel = $("cyp2d6Input");
+  if (!asInput || !phenoSel) return;
+
+  asInput.addEventListener("input", () => {
+    const as = num(asInput.value);
+    if (as === null) return;
+    const ph = cyp2d6PhenotypeFromAS(as);
+    if (ph) {
+      // make sure phenotype is editable
+      if ($("genoAvail")) $("genoAvail").value = "known";
+      phenoSel.disabled = false;
+      phenoSel.value = ph;
+    }
+  });
+}
+
 function init() {
   initLinks();
   setLang("EN");
@@ -809,6 +1004,10 @@ function init() {
     const v = $("genoAvail").value;
     $("cyp2d6Input").disabled = (v === "unknown");
   });
+
+  // NEW init hooks (safe if elements missing)
+  initOptionalGeneUI();
+  initActivityScoreUI();
 
   setPredictStatus({ mode: "idle" });
 }
