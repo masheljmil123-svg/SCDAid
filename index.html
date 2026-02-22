@@ -94,11 +94,17 @@
             </select>
           </div>
 
-          <!-- ✅ NEW: CYP2D6 Activity Score (under phenotype) -->
+          <!-- ✅ UPDATED: CYP2D6 Alleles (replace Activity Score input) -->
           <div class="field">
-            <label for="cyp2d6_activity_score">CYP2D6 activity score</label>
-            <input id="cyp2d6_activity_score" type="number" min="0" step="0.25" placeholder="e.g., 2.0" />
-            <div class="hint">If entered, phenotype will be auto-classified (CPIC thresholds).</div>
+            <label for="cyp2d6_allele1">CYP2D6 allele 1</label>
+            <input id="cyp2d6_allele1" type="text" placeholder="e.g., *1" />
+            <div class="hint">Enter allele 1 (e.g., *1, *4, *10, *41). Supports duplication (e.g., *1x2).</div>
+          </div>
+
+          <div class="field">
+            <label for="cyp2d6_allele2">CYP2D6 allele 2</label>
+            <input id="cyp2d6_allele2" type="text" placeholder="e.g., *10" />
+            <div class="hint">Tool will auto-calculate activity score and classify phenotype (CPIC thresholds).</div>
           </div>
 
           <!-- ✅ NEW: Optional Gene (choose second gene) -->
