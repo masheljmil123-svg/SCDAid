@@ -259,3 +259,18 @@ a:hover{text-decoration:underline}
   color: var(--muted);
   line-height:1.25;
 }
+
+/* =========================
+   NEW: CYP2D6 allele inputs polish (for the new HTML)
+   ========================= */
+
+/* Optional: make allele fields full width if you add class="field full" */
+.field.allele input{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  letter-spacing: .2px;
+}
+
+/* Subtle helper hint style if you want shorter hint under allele inputs */
+.field.allele .hint{
+  margin-top:6px;
+}
