@@ -4,7 +4,7 @@
 // - Output dose unit: mg/mcg/g with alternative in parentheses
 // - Safety blocks show ONLY for meds that appear in plan + primary opioid
 // - Adds phenotype prediction call to local API (FastAPI) and auto-fills CYP2D6 phenotype
-// - NEW: CYP2D6 Activity Score -> auto phenotype (CPIC thresholds)
+// - UPDATED: CYP2D6 Alleles -> auto Activity Score -> auto phenotype (CPIC thresholds)
 // - NEW: Optional gene selector (OPRM1/COMT) informational only
 // - NEW: Nephropathy flag -> add-ons + tighter renal safety
 
@@ -255,7 +255,83 @@ function formatDoseMultiFromMg(mg) {
   return `${mg.toFixed(2)} mg`;
 }
 
-// ===== NEW: CYP2D6 Activity Score -> phenotype (CPIC thresholds) =====
+// ===== UPDATED: CYP2D6 Alleles -> Activity Score -> phenotype =====
+const CYP2D6_ALLELE_ACTIVITY = {
+  // Normal function (1)
+  "*1": 1,
+  "*2": 1,
+  "*35": 1,
+
+  // Decreased function (0.5)
+  "*9": 0.5,
+  "*17": 0.5,
+  "*29": 0.5,
+  "*41": 0.5,
+
+  // Very decreased (0.25)
+  "*10": 0.25,
+  "*36": 0.25,
+
+  // No function (0)
+  "*3": 0,
+  "*4": 0,
+  "*5": 0,
+  "*6": 0,
+  "*7": 0,
+  "*8": 0,
+  "*11": 0,
+  "*12": 0,
+  "*14": 0,
+  "*15": 0,
+  "*19": 0,
+  "*20": 0,
+  "*40": 0,
+  "*42": 0,
+
+  // Uncertain (indeterminate)
+  "*22": null,
+  "*25": null,
+  "*31": null,
+  "*44": null,
+};
+
+function normalizeAllele(a) {
+  if (!a) return "";
+  let x = String(a).trim().toUpperCase().replace(/\s+/g, "");
+  if (x && !x.startsWith("*")) x = "*" + x;
+  return x;
+}
+
+// supports: *1, *1x2, *1xN (xN treated as 2), 1, 1x2
+function parseAlleleWithCopies(raw) {
+  const a = normalizeAllele(raw);
+  const m = a.match(/^(\*\w+)X(\d+|N)$/i);
+  if (m) {
+    const allele = m[1].toUpperCase();
+    const tok = m[2].toUpperCase();
+    const copies = tok === "N" ? 2 : parseInt(tok, 10);
+    return { allele, copies: Number.isFinite(copies) ? copies : 1 };
+  }
+  return { allele: a, copies: 1 };
+}
+
+function calcCYP2D6ActivityScoreFromAlleles(a1Raw, a2Raw) {
+  const p1 = parseAlleleWithCopies(a1Raw);
+  const p2 = parseAlleleWithCopies(a2Raw);
+
+  if (!p1.allele || !p2.allele) return { score: null, reason: "missing" };
+
+  const v1 = CYP2D6_ALLELE_ACTIVITY[p1.allele];
+  const v2 = CYP2D6_ALLELE_ACTIVITY[p2.allele];
+
+  if (v1 === null || v2 === null) return { score: null, reason: "uncertain" };
+  if (v1 === undefined || v2 === undefined) return { score: null, reason: "unknown" };
+
+  const score = (v1 * p1.copies) + (v2 * p2.copies);
+  return { score, reason: "ok" };
+}
+
+// ===== CPIC thresholds: Activity Score -> phenotype code =====
 function cyp2d6PhenotypeFromAS(as) {
   if (as === null || Number.isNaN(as)) return null;
 
@@ -533,16 +609,26 @@ function readInputs() {
   // Existing phenotype input (PM/IM/EM/UM)
   let phenotype = genoAvail === "unknown" ? "EM" : ($("cyp2d6Input")?.value || "EM");
 
-  // NEW: Activity Score overrides phenotype if provided
-  const activityScore = num($("cyp2d6_activity_score")?.value);
-  if (activityScore !== null) {
-    const phFromAS = cyp2d6PhenotypeFromAS(activityScore);
-    if (phFromAS) phenotype = phFromAS;
+  // UPDATED: Alleles -> Activity Score overrides phenotype (if genotype known)
+  const allele1 = $("cyp2d6_allele1")?.value || "";
+  const allele2 = $("cyp2d6_allele2")?.value || "";
 
-    // If user entered AS, treat as effectively "known phenotype"
-    // (we don't force genoAvail dropdown to change here to avoid UI surprises)
-    if ($("cyp2d6Input")) $("cyp2d6Input").value = phenotype;
-    if ($("cyp2d6Input")) $("cyp2d6Input").disabled = false;
+  let activityScore = null;
+
+  if (genoAvail !== "unknown" && (allele1.trim() || allele2.trim())) {
+    const out = calcCYP2D6ActivityScoreFromAlleles(allele1, allele2);
+    activityScore = out.score;
+
+    if (activityScore !== null) {
+      const phFromAS = cyp2d6PhenotypeFromAS(activityScore);
+      if (phFromAS) phenotype = phFromAS;
+
+      if ($("genoAvail")) $("genoAvail").value = "known";
+      if ($("cyp2d6Input")) {
+        $("cyp2d6Input").disabled = false;
+        $("cyp2d6Input").value = phenotype;
+      }
+    }
   }
 
   // NEW: Optional gene selection
@@ -670,9 +756,9 @@ async function predictPhenotype() {
       const mapped = out.predicted === "NM" ? "EM" : out.predicted;
       $("cyp2d6Input").value = mapped;
 
-      // NEW: if API applied phenotype, clear AS field to avoid conflict (optional behavior)
-      // Comment this out if you want to keep AS untouched.
-      if ($("cyp2d6_activity_score")) $("cyp2d6_activity_score").value = "";
+      // UPDATED: if API applied phenotype, clear alleles to avoid conflict (optional)
+      if ($("cyp2d6_allele1")) $("cyp2d6_allele1").value = "";
+      if ($("cyp2d6_allele2")) $("cyp2d6_allele2").value = "";
     }
 
     setPredictStatus({
@@ -709,7 +795,7 @@ function render(model) {
     </div>
   `).join("");
 
-  // NEW: Genetics summary box (only if something was entered)
+  // Genetics summary box
   const geneticsLines = [];
   if (model.activityScore !== null) {
     geneticsLines.push(`CYP2D6 Activity Score: <b>${model.activityScore.toFixed(2)}</b> → <b>${cyp2d6Label(model.phenotype)}</b>`);
@@ -729,7 +815,7 @@ function render(model) {
     </div>
   `;
 
-  // NEW: Nephropathy add-ons box
+  // Nephropathy add-ons box
   const nephBox = model.nephropathy && model.nephAddons?.length
     ? `
       <div class="box">
@@ -839,7 +925,7 @@ function setLang(newLang) {
   $("tramadolRespLabel").textContent = t.tramadolRespLabel;
   $("predictBtn").textContent = t.predictBtn;
 
-  // ALWAYS visible genotype box content (NEW)
+  // ALWAYS visible genotype box content
   if ($("genoBoxTitle")) $("genoBoxTitle").textContent = t.genoBoxTitle;
   if ($("genoBoxIntro")) $("genoBoxIntro").textContent = t.genoBoxIntro;
 
@@ -892,7 +978,6 @@ function run() {
     safetyBlocks,
     stops: safetyStops(inputs.eGFR, inputs.nephropathy),
 
-    // NEW: carry forward genetics + nephropathy info to Results
     phenotype: inputs.phenotype,
     activityScore: inputs.activityScore,
     optionalGene: inputs.optionalGene,
@@ -914,8 +999,9 @@ function reset() {
   $("cyp2d6Input").value = "EM";
   $("cyp2d6Input").disabled = false;
 
-  // NEW: clear activity score
-  if ($("cyp2d6_activity_score")) $("cyp2d6_activity_score").value = "";
+  // UPDATED: clear alleles
+  if ($("cyp2d6_allele1")) $("cyp2d6_allele1").value = "";
+  if ($("cyp2d6_allele2")) $("cyp2d6_allele2").value = "";
 
   // NEW: clear optional gene
   if ($("optional_gene_select")) $("optional_gene_select").value = "";
@@ -942,7 +1028,7 @@ function initLinks() {
   $("owsianyLink").href = LINKS.OWSIANY;
 }
 
-// NEW: init optional gene dropdown options (only if HTML exists)
+// init optional gene dropdown options
 function initOptionalGeneUI() {
   const geneSel = $("optional_gene_select");
   const genoSel = $("optional_gene_genotype");
@@ -969,22 +1055,30 @@ function initOptionalGeneUI() {
   });
 }
 
-function initActivityScoreUI() {
-  const asInput = $("cyp2d6_activity_score");
+// UPDATED: allele inputs auto-update phenotype
+function initAlleleUI() {
+  const a1 = $("cyp2d6_allele1");
+  const a2 = $("cyp2d6_allele2");
   const phenoSel = $("cyp2d6Input");
-  if (!asInput || !phenoSel) return;
+  if (!a1 || !a2 || !phenoSel) return;
 
-  asInput.addEventListener("input", () => {
-    const as = num(asInput.value);
-    if (as === null) return;
-    const ph = cyp2d6PhenotypeFromAS(as);
-    if (ph) {
-      // make sure phenotype is editable
-      if ($("genoAvail")) $("genoAvail").value = "known";
-      phenoSel.disabled = false;
-      phenoSel.value = ph;
-    }
-  });
+  function apply() {
+    const genoAvail = $("genoAvail")?.value || "known";
+    if (genoAvail === "unknown") return;
+
+    const out = calcCYP2D6ActivityScoreFromAlleles(a1.value, a2.value);
+    if (out.score === null) return;
+
+    const ph = cyp2d6PhenotypeFromAS(out.score);
+    if (!ph) return;
+
+    if ($("genoAvail")) $("genoAvail").value = "known";
+    phenoSel.disabled = false;
+    phenoSel.value = ph;
+  }
+
+  a1.addEventListener("input", apply);
+  a2.addEventListener("input", apply);
 }
 
 function init() {
@@ -1005,9 +1099,9 @@ function init() {
     $("cyp2d6Input").disabled = (v === "unknown");
   });
 
-  // NEW init hooks (safe if elements missing)
+  // init hooks
   initOptionalGeneUI();
-  initActivityScoreUI();
+  initAlleleUI();
 
   setPredictStatus({ mode: "idle" });
 }
