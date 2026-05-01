@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SCDAid Learn</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">AI</div>
+      <div>
+        <div class="title">SCDAid Learn</div>
+        <div class="subtitle">
+          Human-in-the-loop learning module for functional CYP2D6 phenotype prediction
+        </div>
+      </div>
+    </div>
+
+    <div class="topActions">
+      <a class="btn ghost" href="index.html">Back to SCDAid</a>
+    </div>
+  </div>
+
+  <main class="wrap">
+    <section class="left">
+      <div class="card">
+        <div class="cardHeader">
+          <h2>New Training Case</h2>
+        </div>
+
+        <div class="grid">
+          <div class="field">
+            <label>Age</label>
+            <input id="learn_age" type="number" placeholder="e.g., 24" />
+          </div>
+
+          <div class="field">
+            <label>Sex</label>
+            <select id="learn_sex">
+              <option value="F">F</option>
+              <option value="M">M</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Weight (kg)</label>
+            <input id="learn_weight" type="number" placeholder="e.g., 70" />
+          </div>
+
+          <div class="field">
+            <label>eGFR</label>
+            <input id="learn_egfr" type="number" placeholder="e.g., 90" />
+          </div>
+
+          <div class="field">
+            <label>CYP2D6 inhibitor</label>
+            <select id="learn_inhibitor">
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Prior codeine response</label>
+            <select id="learn_codeine">
+              <option value="ineffective">Ineffective</option>
+              <option value="effective">Effective</option>
+              <option value="adverse">Adverse effects</option>
+              <option value="unknown">Unknown</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Prior tramadol response</label>
+            <select id="learn_tramadol">
+              <option value="ineffective">Ineffective</option>
+              <option value="effective">Effective</option>
+              <option value="adverse">Adverse effects</option>
+              <option value="unknown">Unknown</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>OPRM1 genotype</label>
+            <select id="learn_oprm1">
+              <option value="">None</option>
+              <option value="AA">AA</option>
+              <option value="AG">AG</option>
+              <option value="GG">GG</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>COMT genotype</label>
+            <select id="learn_comt">
+              <option value="">None</option>
+              <option value="Val/Val">Val/Val</option>
+              <option value="Val/Met">Val/Met</option>
+              <option value="Met/Met">Met/Met</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>AI predicted phenotype</label>
+            <select id="learn_predicted">
+              <option value="PM">PM</option>
+              <option value="IM">IM</option>
+              <option value="NM">NM</option>
+              <option value="UM">UM</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Actual phenotype if confirmed</label>
+            <select id="learn_actual">
+              <option value="">Not confirmed yet</option>
+              <option value="PM">PM</option>
+              <option value="IM">IM</option>
+              <option value="NM">NM</option>
+              <option value="UM">UM</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Review status</label>
+            <select id="learn_reviewed">
+              <option value="no">Not reviewed</option>
+              <option value="yes">Approved for training</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" type="button" onclick="saveCase()">Save Case</button>
+          <button class="btn ghost" type="button" onclick="clearCases()">Clear Cases</button>
+        </div>
+
+        <div class="disclaimer">
+          Educational prototype only. Use simulated or de-identified cases only.
+        </div>
+      </div>
+    </section>
+
+    <section class="right">
+      <div class="card">
+        <div class="cardHeader">
+          <h2>Training Dataset</h2>
+        </div>
+
+        <div id="learn_stats" class="box">
+          No cases added yet.
+        </div>
+
+        <div id="casesTable" class="box">
+          Cases will appear here.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    let cases = JSON.parse(localStorage.getItem("scdaid_learn_cases") || "[]");
+
+    function getValue(id) {
+      return document.getElementById(id)?.value || "";
+    }
+
+    function saveCase() {
+      const newCase = {
+        age: getValue("learn_age"),
+        sex: getValue("learn_sex"),
+        weight: getValue("learn_weight"),
+        egfr: getValue("learn_egfr"),
+        inhibitor: getValue("learn_inhibitor"),
+        codeine: getValue("learn_codeine"),
+        tramadol: getValue("learn_tramadol"),
+        oprm1: getValue("learn_oprm1"),
+        comt: getValue("learn_comt"),
+        predicted: getValue("learn_predicted"),
+        actual: getValue("learn_actual"),
+        reviewed: getValue("learn_reviewed")
+      };
+
+      cases.push(newCase);
+      localStorage.setItem("scdaid_learn_cases", JSON.stringify(cases));
+      renderCases();
+    }
+
+    function clearCases() {
+      cases = [];
+      localStorage.removeItem("scdaid_learn_cases");
+      renderCases();
+    }
+
+    function renderCases() {
+      const reviewed = cases.filter(c => c.reviewed === "yes");
+      const confirmed = reviewed.filter(c => c.actual);
+      const correct = confirmed.filter(c => c.predicted === c.actual);
+
+      const accuracy = confirmed.length
+        ? Math.round((correct.length / confirmed.length) * 100)
+        : null;
+
+      document.getElementById("learn_stats").innerHTML = `
+        <b>Total cases:</b> ${cases.length}<br>
+        <b>Approved for training:</b> ${reviewed.length}<br>
+        <b>Confirmed cases:</b> ${confirmed.length}<br>
+        <b>Current accuracy:</b> ${accuracy === null ? "Not enough data" : accuracy + "%"}
+      `;
+
+      if (!cases.length) {
+        document.getElementById("casesTable").innerHTML = "Cases will appear here.";
+        return;
+      }
+
+      document.getElementById("casesTable").innerHTML = `
+        <table style="width:100%; border-collapse: collapse;">
+          <thead>
+            <tr>
+              <th>Age</th>
+              <th>Sex</th>
+              <th>Codeine</th>
+              <th>Tramadol</th>
+              <th>Predicted</th>
+              <th>Actual</th>
+              <th>Reviewed</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${cases.map(c => `
+              <tr>
+                <td>${c.age}</td>
+                <td>${c.sex}</td>
+                <td>${c.codeine}</td>
+                <td>${c.tramadol}</td>
+                <td>${c.predicted}</td>
+                <td>${c.actual || "-"}</td>
+                <td>${c.reviewed}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    renderCases();
+  </script>
+</body>
+</html>
