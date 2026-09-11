@@ -94,19 +94,34 @@ export function AssessmentPage() {
       <Navbar />
       <section className="assessment-shell">
         <Sidebar activeItem={activePage} onNavigate={onNavigate} />
-        {activePage === 'assessment' ? (
-          <PatientAssessment
-            form={form}
-            errors={errors}
-            progress={progress}
-            loading={loading}
-            onChange={onChange}
-            onClear={onClear}
-            onSubmit={onSubmit}
-          />
-        ) : (
-          <WorkspacePanel view={activePage} />
-        )}
+        <div className="assess-column">
+          {activePage === 'assessment' ? (
+            <>
+              <PatientAssessment
+                form={form}
+                errors={errors}
+                progress={progress}
+                loading={loading}
+                onChange={onChange}
+                onClear={onClear}
+                onSubmit={onSubmit}
+              />
+              <aside className="assess-help">
+                <p className="assess-help-title">Need Help?</p>
+                <p>Check our user guide or contact support.</p>
+                <button
+                  type="button"
+                  className="assess-help-btn"
+                  onClick={() => onNavigate('resources')}
+                >
+                  View Guide
+                </button>
+              </aside>
+            </>
+          ) : (
+            <WorkspacePanel view={activePage} />
+          )}
+        </div>
         <RecommendationResults
           result={result}
           form={form}

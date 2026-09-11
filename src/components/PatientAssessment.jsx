@@ -1,8 +1,7 @@
 import { ArrowRight, Plus, X } from 'lucide-react'
 import { useMemo } from 'react'
 import { InputSection } from './InputSection.jsx'
-import { ChipSearch } from './form/ChipSearch.jsx'
-import { SearchSelect } from './form/SearchSelect.jsx'
+import { SearchableCombobox } from './form/SearchableCombobox.jsx'
 import {
   COMORBIDITY_SUGGESTIONS,
   COPY_NUMBER_OPTIONS,
@@ -246,14 +245,14 @@ export function PatientAssessment({
             </div>
             {vitalSigns.map((row) => (
               <div key={row.id} className="dynamic-row">
-                <input
-                  className="control"
-                  list="vital-name-options"
-                  placeholder="Field name"
+                <SearchableCombobox
                   value={row.name}
-                  onChange={(e) =>
-                    onChange('vitalSigns', updateRow(vitalSigns, row.id, { name: e.target.value }))
+                  onChange={(value) =>
+                    onChange('vitalSigns', updateRow(vitalSigns, row.id, { name: value }))
                   }
+                  options={VITAL_SIGN_SUGGESTIONS}
+                  placeholder="Field name"
+                  allowCustom
                 />
                 <input
                   className="control"
@@ -264,14 +263,14 @@ export function PatientAssessment({
                     onChange('vitalSigns', updateRow(vitalSigns, row.id, { value: e.target.value }))
                   }
                 />
-                <input
-                  className="control"
-                  list="vital-unit-options"
-                  placeholder="Unit"
+                <SearchableCombobox
                   value={row.unit}
-                  onChange={(e) =>
-                    onChange('vitalSigns', updateRow(vitalSigns, row.id, { unit: e.target.value }))
+                  onChange={(value) =>
+                    onChange('vitalSigns', updateRow(vitalSigns, row.id, { unit: value }))
                   }
+                  options={VITAL_SIGN_UNITS}
+                  placeholder="Unit"
+                  allowCustom
                 />
                 <button
                   type="button"
@@ -288,16 +287,6 @@ export function PatientAssessment({
                 </button>
               </div>
             ))}
-            <datalist id="vital-name-options">
-              {VITAL_SIGN_SUGGESTIONS.map((name) => (
-                <option key={name} value={name} />
-              ))}
-            </datalist>
-            <datalist id="vital-unit-options">
-              {VITAL_SIGN_UNITS.map((unit) => (
-                <option key={unit} value={unit} />
-              ))}
-            </datalist>
             <button type="button" className="add-row-btn" onClick={addVital}>
               <Plus size={14} />
               Add vital sign
@@ -311,12 +300,13 @@ export function PatientAssessment({
               requirement="optional"
               hint="Sickle cell genotype — not CYP2D6."
             >
-              <SearchSelect
+              <SearchableCombobox
                 id="scdGenotype"
                 value={form.scdGenotype}
                 onChange={(value) => onChange('scdGenotype', value)}
                 options={SCD_GENOTYPE_OPTIONS}
-                placeholder="e.g. HbSS, HbSC, Other"
+                placeholder="Search or select genotype"
+                allowCustom
               />
             </Field>
             <Field
@@ -342,11 +332,13 @@ export function PatientAssessment({
             requirement="conditional"
             hint="Searchable multi-select. Condition list is configurable."
           >
-            <ChipSearch
+            <SearchableCombobox
               id="comorbidities"
+              multiple
+              allowCustom
               values={comorbidities}
               onChange={(values) => onChange('comorbidities', values)}
-              suggestions={COMORBIDITY_SUGGESTIONS}
+              options={COMORBIDITY_SUGGESTIONS}
               placeholder="Search or type a condition"
             />
           </Field>
@@ -416,14 +408,14 @@ export function PatientAssessment({
             </div>
             {liverTests.map((row) => (
               <div key={row.id} className="dynamic-row">
-                <input
-                  className="control"
-                  list="lft-name-options"
-                  placeholder="Test name"
+                <SearchableCombobox
                   value={row.name}
-                  onChange={(e) =>
-                    onChange('liverTests', updateRow(liverTests, row.id, { name: e.target.value }))
+                  onChange={(value) =>
+                    onChange('liverTests', updateRow(liverTests, row.id, { name: value }))
                   }
+                  options={LIVER_TEST_SUGGESTIONS}
+                  placeholder="Test name"
+                  allowCustom
                 />
                 <input
                   className="control"
@@ -434,14 +426,14 @@ export function PatientAssessment({
                     onChange('liverTests', updateRow(liverTests, row.id, { value: e.target.value }))
                   }
                 />
-                <input
-                  className="control"
-                  list="lft-unit-options"
-                  placeholder="Unit"
+                <SearchableCombobox
                   value={row.unit}
-                  onChange={(e) =>
-                    onChange('liverTests', updateRow(liverTests, row.id, { unit: e.target.value }))
+                  onChange={(value) =>
+                    onChange('liverTests', updateRow(liverTests, row.id, { unit: value }))
                   }
+                  options={LIVER_TEST_UNITS}
+                  placeholder="Unit"
+                  allowCustom
                 />
                 <button
                   type="button"
@@ -458,16 +450,6 @@ export function PatientAssessment({
                 </button>
               </div>
             ))}
-            <datalist id="lft-name-options">
-              {LIVER_TEST_SUGGESTIONS.map((name) => (
-                <option key={name} value={name} />
-              ))}
-            </datalist>
-            <datalist id="lft-unit-options">
-              {LIVER_TEST_UNITS.map((unit) => (
-                <option key={unit} value={unit} />
-              ))}
-            </datalist>
             <button type="button" className="add-row-btn" onClick={addLiverTest}>
               <Plus size={14} />
               Add test
@@ -482,12 +464,14 @@ export function PatientAssessment({
             requirement="required"
             error={errors.medications}
           >
-            <ChipSearch
+            <SearchableCombobox
               id="medications"
+              multiple
+              allowCustom
               values={medications}
               onChange={(values) => onChange('medications', values)}
-              suggestions={MEDICATION_SUGGESTIONS}
-              placeholder="Type a medication and press Enter"
+              options={MEDICATION_SUGGESTIONS}
+              placeholder="Search or type a medication"
             />
           </Field>
 
@@ -535,13 +519,14 @@ export function PatientAssessment({
               <>
                 {baselineOpioids.map((row) => (
                   <div key={row.id} className="dynamic-row dynamic-row--opioid">
-                    <SearchSelect
+                    <SearchableCombobox
                       value={row.drug}
                       onChange={(value) =>
                         onChange('baselineOpioids', updateRow(baselineOpioids, row.id, { drug: value }))
                       }
                       options={OPIOID_OPTIONS}
                       placeholder="Opioid / drug"
+                      allowCustom
                     />
                     <input
                       className="control"
@@ -611,13 +596,14 @@ export function PatientAssessment({
           >
             {previousResponses.map((row) => (
               <div key={row.id} className="dynamic-row">
-                <SearchSelect
+                <SearchableCombobox
                   value={row.opioid}
                   onChange={(value) =>
                     onChange('previousResponses', updateRow(previousResponses, row.id, { opioid: value }))
                   }
                   options={OPIOID_OPTIONS}
                   placeholder="Opioid"
+                  allowCustom
                 />
                 <select
                   className="control"
@@ -678,13 +664,14 @@ export function PatientAssessment({
               <>
                 {allergies.map((row) => (
                   <div key={row.id} className="dynamic-row">
-                    <input
-                      className="control"
-                      placeholder="Drug"
+                    <SearchableCombobox
                       value={row.drug}
-                      onChange={(e) =>
-                        onChange('allergies', updateRow(allergies, row.id, { drug: e.target.value }))
+                      onChange={(value) =>
+                        onChange('allergies', updateRow(allergies, row.id, { drug: value }))
                       }
+                      options={OPIOID_OPTIONS}
+                      placeholder="Drug"
+                      allowCustom
                     />
                     <input
                       className="control"
@@ -759,12 +746,13 @@ export function PatientAssessment({
                   requirement="conditional"
                   error={errors.allele1}
                 >
-                  <SearchSelect
+                  <SearchableCombobox
                     id="allele1"
                     value={form.allele1}
                     onChange={(value) => onChange('allele1', value)}
                     options={CYP2D6_ALLELE_OPTIONS}
                     placeholder="CPIC allele, e.g. *1"
+                    allowCustom={false}
                   />
                 </Field>
                 <Field
@@ -773,12 +761,13 @@ export function PatientAssessment({
                   requirement="conditional"
                   error={errors.allele2}
                 >
-                  <SearchSelect
+                  <SearchableCombobox
                     id="allele2"
                     value={form.allele2}
                     onChange={(value) => onChange('allele2', value)}
                     options={CYP2D6_ALLELE_OPTIONS}
                     placeholder="CPIC allele, e.g. *4"
+                    allowCustom={false}
                   />
                 </Field>
               </div>
@@ -817,12 +806,13 @@ export function PatientAssessment({
                     </select>
                   </Field>
                   <Field label="Duplicated allele" htmlFor="duplicatedAllele" requirement="conditional">
-                    <SearchSelect
+                    <SearchableCombobox
                       id="duplicatedAllele"
                       value={form.duplicatedAllele}
                       onChange={(value) => onChange('duplicatedAllele', value)}
                       options={CYP2D6_ALLELE_OPTIONS}
                       placeholder="If known"
+                      allowCustom={false}
                     />
                   </Field>
                 </div>

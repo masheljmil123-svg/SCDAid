@@ -35,14 +35,6 @@ export function Sidebar({ activeItem = 'assessment', onNavigate }) {
           )
         })}
       </nav>
-
-      <div className="mini-help">
-        <p className="mini-help-title">Need Help?</p>
-        <p>Check our user guide or contact support.</p>
-        <button type="button" className="mini-help-btn" onClick={() => onNavigate?.('resources')}>
-          View Guide
-        </button>
-      </div>
     </aside>
   )
 }
