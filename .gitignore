@@ -1,0 +1,64 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencies and virtual environments
+node_modules/
+.venv/
+venv/
+backend/.venv/
+ml/.venv/
+
+# Environment and secrets — never commit real values
+.env
+.env.*
+!.env.example
+!backend/.env.example
+backend/.env
+
+# Local databases and session/OAuth artifacts
+*.db
+*.sqlite
+*.sqlite3
+backend/*.db
+scdaid.db
+*.pem
+*.key
+*.p12
+cookies.txt
+.secrets/
+.oauth-tokens
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Build output
+dist/
+dist-ssr/
+*.local
+
+# Accidental duplicate data copies
+ml:data/
+
+# Editor / OS
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.cursor/

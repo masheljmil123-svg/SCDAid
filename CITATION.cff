@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+title: SCDAid
+message: If you use this software, please cite it using these metadata.
+type: software
+abstract: >-
+  Hybrid evidence-based and machine-learning clinical decision-support
+  research prototype for opioid strategy ranking in adult sickle-cell
+  vaso-occlusive crisis. The included datasets are synthetic simulation
+  data. The current ML model is a proof-of-concept trained on
+  evidence-informed synthetic simulation data and has not established
+  clinical predictive validity.
+authors:
+  - name: SCDAid contributors
+keywords:
+  - sickle cell disease
+  - vaso-occlusive crisis
+  - clinical decision support
+  - pharmacogenomics
+  - CYP2D6
+  - synthetic data
+# When the accompanying article is published, add an identifier block, for example:
+# identifiers:
+#   - type: doi
+#     value: "<replace-with-the-article-DOI>"

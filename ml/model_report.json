@@ -1,0 +1,1414 @@
+{
+  "evaluation_label": "simulation-only / synthetic oracle evaluation",
+  "generated_at_utc": "2026-09-11T11:37:54.825271+00:00",
+  "dataset_counts": {
+    "encounter_rows": 2000,
+    "candidate_rows_all": 12000,
+    "candidate_rows_training_eligible": 11703,
+    "development_rows": 9377,
+    "held_out_rows": 2326,
+    "development_encounters": 1606,
+    "held_out_encounters": 394
+  },
+  "patient_separation": {
+    "development_patients": 400,
+    "held_out_patients": 100,
+    "overlapping_patients": 0,
+    "patient_leakage": false
+  },
+  "leakage_audit": {
+    "requested_features": [
+      "age",
+      "weight_kg",
+      "BMI",
+      "baseline_pain",
+      "VOC_history_prior_year",
+      "eGFR",
+      "serum_creatinine_mg_dL",
+      "heart_rate_bpm",
+      "SBP_mmHg",
+      "DBP_mmHg",
+      "resp_rate_min",
+      "SpO2_pct",
+      "temperature_C",
+      "baseline_opioid_daily_MME",
+      "baseline_opioid_continuous_days",
+      "genotype_activity_score",
+      "sex",
+      "SCD_genotype",
+      "opioid_tolerance",
+      "CNS_depressant_present",
+      "CYP2D6_genotype_available",
+      "genotype_predicted_phenotype",
+      "functional_phenotype",
+      "CYP2D6_inhibitor_strength",
+      "candidate_opioid",
+      "previous_response_this_opioid"
+    ],
+    "missing_requested_features": [],
+    "used_features": [
+      "age",
+      "weight_kg",
+      "BMI",
+      "baseline_pain",
+      "VOC_history_prior_year",
+      "eGFR",
+      "serum_creatinine_mg_dL",
+      "heart_rate_bpm",
+      "SBP_mmHg",
+      "DBP_mmHg",
+      "resp_rate_min",
+      "SpO2_pct",
+      "temperature_C",
+      "baseline_opioid_daily_MME",
+      "baseline_opioid_continuous_days",
+      "genotype_activity_score",
+      "sex",
+      "SCD_genotype",
+      "opioid_tolerance",
+      "CNS_depressant_present",
+      "CYP2D6_genotype_available",
+      "genotype_predicted_phenotype",
+      "functional_phenotype",
+      "CYP2D6_inhibitor_strength",
+      "candidate_opioid",
+      "previous_response_this_opioid"
+    ],
+    "excluded_leakage_columns": [
+      "ED_LOS_hours",
+      "admission_probability",
+      "clinically_meaningful_60_ge_1_3",
+      "clinically_meaningful_disposition_ge_1_4",
+      "clinically_meaningful_disposition_ge_30pct",
+      "delta_pain_60",
+      "delta_pain_disposition",
+      "disposition",
+      "eligibility_status",
+      "observed_opioid_eligibility",
+      "observed_rule_reason",
+      "pain_120min",
+      "pain_180min",
+      "pain_30min",
+      "pain_60min",
+      "pain_90min",
+      "pain_at_disposition",
+      "percent_pain_reduction_60",
+      "percent_pain_reduction_disposition",
+      "potential_clinically_meaningful_60_ge_1_3",
+      "potential_clinically_meaningful_disposition_ge_1_4",
+      "potential_clinically_meaningful_disposition_ge_30pct",
+      "potential_delta_pain_disposition",
+      "potential_pain_120",
+      "potential_pain_180",
+      "potential_pain_30",
+      "potential_pain_60",
+      "potential_pain_90",
+      "potential_pain_disposition",
+      "potential_percent_reduction_60",
+      "potential_percent_reduction_disposition",
+      "rescue_repeat_needed",
+      "rule_reasons",
+      "serious_opioid_AE_naturalistic",
+      "switch_needed",
+      "synthetic_rescue_probability",
+      "synthetic_switch_probability",
+      "training_eligible"
+    ],
+    "excluded_id_fields": [
+      "patient_id",
+      "encounter_id",
+      "split"
+    ],
+    "excluded_non_predictor_columns": [
+      "allergy_intolerance",
+      "prev_resp_morphine",
+      "prev_resp_hydromorphone",
+      "prev_resp_fentanyl",
+      "prev_resp_oxycodone",
+      "prev_resp_tramadol",
+      "prev_resp_codeine",
+      "dose_strategy",
+      "renal_band",
+      "hepatic_status",
+      "AST_U_L",
+      "ALT_U_L",
+      "total_bilirubin_mg_dL",
+      "current_medications",
+      "comorbidities",
+      "CYP2D6_allele1",
+      "CYP2D6_allele2",
+      "copy_number_variation",
+      "adjusted_activity_score",
+      "inhibitor_factor",
+      "phenoconversion",
+      "opioid_administered"
+    ],
+    "other_unused_source_columns": [
+      "CNS_depressant_agents",
+      "CYP2D6_inhibitor_drug",
+      "baseline_opioid_therapy",
+      "baseline_pain_0_10",
+      "eGFR_mL_min_1_73m2",
+      "first_opioid_time_min",
+      "first_opioid_within_60min",
+      "functional_inhibition_risk_if_no_genotype",
+      "ground_truth_note",
+      "inhibitor_class_for_adjustment",
+      "number_of_opioid_doses",
+      "outcome_generator_note",
+      "repeat_dose_interval_min",
+      "repeat_within_30min_if_needed",
+      "route",
+      "sim_SpO2_lt95_requiring_O2",
+      "sim_drowsiness",
+      "sim_moderate_severe_sedation",
+      "sim_pruritus_active_surveillance",
+      "sim_vomiting_active_surveillance",
+      "simulation_version",
+      "visit_index"
+    ],
+    "target": "potential_delta_pain_60",
+    "target_not_used_as_predictor": true,
+    "allergy_used_as_predictor": false,
+    "eligibility_used_as_predictor": false
+  },
+  "treatment_distributions": {
+    "training_eligible_candidate_counts": {
+      "Fentanyl": 1995,
+      "Oxycodone": 1992,
+      "Morphine": 1991,
+      "Hydromorphone": 1985,
+      "Codeine": 1875,
+      "Tramadol": 1865
+    },
+    "development_candidate_counts": {
+      "Fentanyl": 1606,
+      "Morphine": 1603,
+      "Oxycodone": 1602,
+      "Hydromorphone": 1591,
+      "Codeine": 1489,
+      "Tramadol": 1486
+    },
+    "naturalistic_opioid_administered": {
+      "Morphine": 1693,
+      "Hydromorphone": 197,
+      "Fentanyl": 97,
+      "Oxycodone": 7,
+      "Tramadol": 5,
+      "Codeine": 1
+    },
+    "candidate_balance_note": "After filtering training_eligible==Yes, candidate opioid counts are approximately balanced across the six opioids.",
+    "naturalistic_imbalance_note": "The encounter dataset is highly Morphine-dominated and is not the training table."
+  },
+  "features_used": [
+    "age",
+    "weight_kg",
+    "BMI",
+    "baseline_pain",
+    "VOC_history_prior_year",
+    "eGFR",
+    "serum_creatinine_mg_dL",
+    "heart_rate_bpm",
+    "SBP_mmHg",
+    "DBP_mmHg",
+    "resp_rate_min",
+    "SpO2_pct",
+    "temperature_C",
+    "baseline_opioid_daily_MME",
+    "baseline_opioid_continuous_days",
+    "genotype_activity_score",
+    "sex",
+    "SCD_genotype",
+    "opioid_tolerance",
+    "CNS_depressant_present",
+    "CYP2D6_genotype_available",
+    "genotype_predicted_phenotype",
+    "functional_phenotype",
+    "CYP2D6_inhibitor_strength",
+    "candidate_opioid",
+    "previous_response_this_opioid"
+  ],
+  "cross_validation": {
+    "linear_regression": {
+      "configs": [
+        {
+          "params": {},
+          "mae_mean": 0.328056,
+          "mae_std": 0.005006,
+          "rmse_mean": 0.405824,
+          "rmse_std": 0.005822,
+          "top1_agreement_mean": 0.315594,
+          "mean_ranking_regret_mean": 0.398413,
+          "median_ranking_regret_mean": 0.3,
+          "folds": [
+            {
+              "mae": 0.335234,
+              "rmse": 0.412264,
+              "n_rows": 1876,
+              "top1_agreement": 0.333333,
+              "mean_ranking_regret": 0.373899,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 318,
+              "mean_eligible_candidates": 5.899,
+              "fold": 1
+            },
+            {
+              "mae": 0.331659,
+              "rmse": 0.40987,
+              "n_rows": 1876,
+              "top1_agreement": 0.301887,
+              "mean_ranking_regret": 0.42044,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 318,
+              "mean_eligible_candidates": 5.899,
+              "fold": 2
+            },
+            {
+              "mae": 0.328264,
+              "rmse": 0.409149,
+              "n_rows": 1876,
+              "top1_agreement": 0.352761,
+              "mean_ranking_regret": 0.407055,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 326,
+              "mean_eligible_candidates": 5.755,
+              "fold": 3
+            },
+            {
+              "mae": 0.322116,
+              "rmse": 0.397305,
+              "n_rows": 1875,
+              "top1_agreement": 0.306502,
+              "mean_ranking_regret": 0.396904,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 323,
+              "mean_eligible_candidates": 5.805,
+              "fold": 4
+            },
+            {
+              "mae": 0.323007,
+              "rmse": 0.400533,
+              "n_rows": 1874,
+              "top1_agreement": 0.283489,
+              "mean_ranking_regret": 0.393769,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 321,
+              "mean_eligible_candidates": 5.838,
+              "fold": 5
+            }
+          ]
+        }
+      ],
+      "selected": {
+        "params": {},
+        "mae_mean": 0.328056,
+        "mae_std": 0.005006,
+        "rmse_mean": 0.405824,
+        "rmse_std": 0.005822,
+        "top1_agreement_mean": 0.315594,
+        "mean_ranking_regret_mean": 0.398413,
+        "median_ranking_regret_mean": 0.3,
+        "folds": [
+          {
+            "mae": 0.335234,
+            "rmse": 0.412264,
+            "n_rows": 1876,
+            "top1_agreement": 0.333333,
+            "mean_ranking_regret": 0.373899,
+            "median_ranking_regret": 0.3,
+            "n_encounters": 318,
+            "mean_eligible_candidates": 5.899,
+            "fold": 1
+          },
+          {
+            "mae": 0.331659,
+            "rmse": 0.40987,
+            "n_rows": 1876,
+            "top1_agreement": 0.301887,
+            "mean_ranking_regret": 0.42044,
+            "median_ranking_regret": 0.3,
+            "n_encounters": 318,
+            "mean_eligible_candidates": 5.899,
+            "fold": 2
+          },
+          {
+            "mae": 0.328264,
+            "rmse": 0.409149,
+            "n_rows": 1876,
+            "top1_agreement": 0.352761,
+            "mean_ranking_regret": 0.407055,
+            "median_ranking_regret": 0.3,
+            "n_encounters": 326,
+            "mean_eligible_candidates": 5.755,
+            "fold": 3
+          },
+          {
+            "mae": 0.322116,
+            "rmse": 0.397305,
+            "n_rows": 1875,
+            "top1_agreement": 0.306502,
+            "mean_ranking_regret": 0.396904,
+            "median_ranking_regret": 0.3,
+            "n_encounters": 323,
+            "mean_eligible_candidates": 5.805,
+            "fold": 4
+          },
+          {
+            "mae": 0.323007,
+            "rmse": 0.400533,
+            "n_rows": 1874,
+            "top1_agreement": 0.283489,
+            "mean_ranking_regret": 0.393769,
+            "median_ranking_regret": 0.3,
+            "n_encounters": 321,
+            "mean_eligible_candidates": 5.838,
+            "fold": 5
+          }
+        ]
+      }
+    },
+    "random_forest": {
+      "configs": [
+        {
+          "params": {
+            "max_depth": 8,
+            "min_samples_leaf": 2,
+            "n_estimators": 150
+          },
+          "mae_mean": 0.329181,
+          "mae_std": 0.005165,
+          "rmse_mean": 0.407292,
+          "rmse_std": 0.005862,
+          "top1_agreement_mean": 0.301802,
+          "mean_ranking_regret_mean": 0.411255,
+          "median_ranking_regret_mean": 0.32,
+          "folds": [
+            {
+              "mae": 0.336586,
+              "rmse": 0.413474,
+              "n_rows": 1876,
+              "top1_agreement": 0.292453,
+              "mean_ranking_regret": 0.407862,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 318,
+              "mean_eligible_candidates": 5.899,
+              "fold": 1
+            },
+            {
+              "mae": 0.332958,
+              "rmse": 0.412318,
+              "n_rows": 1876,
+              "top1_agreement": 0.27044,
+              "mean_ranking_regret": 0.463522,
+              "median_ranking_regret": 0.4,
+              "n_encounters": 318,
+              "mean_eligible_candidates": 5.899,
+              "fold": 2
+            },
+            {
+              "mae": 0.329302,
+              "rmse": 0.409972,
+              "n_rows": 1876,
+              "top1_agreement": 0.340491,
+              "mean_ranking_regret": 0.408282,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 326,
+              "mean_eligible_candidates": 5.755,
+              "fold": 3
+            },
+            {
+              "mae": 0.323063,
+              "rmse": 0.39881,
+              "n_rows": 1875,
+              "top1_agreement": 0.297214,
+              "mean_ranking_regret": 0.404644,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 323,
+              "mean_eligible_candidates": 5.805,
+              "fold": 4
+            },
+            {
+              "mae": 0.323998,
+              "rmse": 0.401886,
+              "n_rows": 1874,
+              "top1_agreement": 0.308411,
+              "mean_ranking_regret": 0.371963,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 321,
+              "mean_eligible_candidates": 5.838,
+              "fold": 5
+            }
+          ]
+        },
+        {
+          "params": {
+            "max_depth": 8,
+            "min_samples_leaf": 5,
+            "n_estimators": 150
+          },
+          "mae_mean": 0.329086,
+          "mae_std": 0.005189,
+          "rmse_mean": 0.407304,
+          "rmse_std": 0.005947,
+          "top1_agreement_mean": 0.296802,
+          "mean_ranking_regret_mean": 0.415638,
+          "median_ranking_regret_mean": 0.32,
+          "folds": [
+            {
+              "mae": 0.336433,
+              "rmse": 0.413704,
+              "n_rows": 1876,
+              "top1_agreement": 0.286164,
+              "mean_ranking_regret": 0.414151,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 318,
+              "mean_eligible_candidates": 5.899,
+              "fold": 1
+            },
+            {
+              "mae": 0.333108,
+              "rmse": 0.412279,
+              "n_rows": 1876,
+              "top1_agreement": 0.267296,
+              "mean_ranking_regret": 0.476101,
+              "median_ranking_regret": 0.4,
+              "n_encounters": 318,
+              "mean_eligible_candidates": 5.899,
+              "fold": 2
+            },
+            {
+              "mae": 0.329005,
+              "rmse": 0.410021,
+              "n_rows": 1876,
+              "top1_agreement": 0.343558,
+              "mean_ranking_regret": 0.414417,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 326,
+              "mean_eligible_candidates": 5.755,
+              "fold": 3
+            },
+            {
+              "mae": 0.322838,
+              "rmse": 0.398763,
+              "n_rows": 1875,
+              "top1_agreement": 0.287926,
+              "mean_ranking_regret": 0.4,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 323,
+              "mean_eligible_candidates": 5.805,
+              "fold": 4
+            },
+            {
+              "mae": 0.324045,
+              "rmse": 0.401754,
+              "n_rows": 1874,
+              "top1_agreement": 0.299065,
+              "mean_ranking_regret": 0.37352,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 321,
+              "mean_eligible_candidates": 5.838,
+              "fold": 5
+            }
+          ]
+        },
+        {
+          "params": {
+            "max_depth": 16,
+            "min_samples_leaf": 2,
+            "n_estimators": 150
+          },
+          "mae_mean": 0.331382,
+          "mae_std": 0.005314,
+          "rmse_mean": 0.410661,
+          "rmse_std": 0.006113,
+          "top1_agreement_mean": 0.30446,
+          "mean_ranking_regret_mean": 0.41295,
+          "median_ranking_regret_mean": 0.33,
+          "folds": [
+            {
+              "mae": 0.339392,
+              "rmse": 0.417173,
+              "n_rows": 1876,
+              "top1_agreement": 0.308176,
+              "mean_ranking_regret": 0.410063,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 318,
+              "mean_eligible_candidates": 5.899,
+              "fold": 1
+            },
+            {
+              "mae": 0.334994,
+              "rmse": 0.416036,
+              "n_rows": 1876,
+              "top1_agreement": 0.295597,
+              "mean_ranking_regret": 0.449057,
+              "median_ranking_regret": 0.4,
+              "n_encounters": 318,
+              "mean_eligible_candidates": 5.899,
+              "fold": 2
+            },
+            {
+              "mae": 0.331034,
+              "rmse": 0.4131,
+              "n_rows": 1876,
+              "top1_agreement": 0.306748,
+              "mean_ranking_regret": 0.422086,
+              "median_ranking_regret": 0.35,
+              "n_encounters": 326,
+              "mean_eligible_candidates": 5.755,
+              "fold": 3
+            },
+            {
+              "mae": 0.325366,
+              "rmse": 0.40163,
+              "n_rows": 1875,
+              "top1_agreement": 0.309598,
+              "mean_ranking_regret": 0.391022,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 323,
+              "mean_eligible_candidates": 5.805,
+              "fold": 4
+            },
+            {
+              "mae": 0.326124,
+              "rmse": 0.405366,
+              "n_rows": 1874,
+              "top1_agreement": 0.302181,
+              "mean_ranking_regret": 0.392523,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 321,
+              "mean_eligible_candidates": 5.838,
+              "fold": 5
+            }
+          ]
+        },
+        {
+          "params": {
+            "max_depth": 16,
+            "min_samples_leaf": 5,
+            "n_estimators": 150
+          },
+          "mae_mean": 0.33115,
+          "mae_std": 0.005208,
+          "rmse_mean": 0.410298,
+          "rmse_std": 0.006087,
+          "top1_agreement_mean": 0.2863,
+          "mean_ranking_regret_mean": 0.436559,
+          "median_ranking_regret_mean": 0.34,
+          "folds": [
+            {
+              "mae": 0.338139,
+              "rmse": 0.415821,
+              "n_rows": 1876,
+              "top1_agreement": 0.279874,
+              "mean_ranking_regret": 0.438994,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 318,
+              "mean_eligible_candidates": 5.899,
+              "fold": 1
+            },
+            {
+              "mae": 0.335419,
+              "rmse": 0.41601,
+              "n_rows": 1876,
+              "top1_agreement": 0.273585,
+              "mean_ranking_regret": 0.472013,
+              "median_ranking_regret": 0.4,
+              "n_encounters": 318,
+              "mean_eligible_candidates": 5.899,
+              "fold": 2
+            },
+            {
+              "mae": 0.331582,
+              "rmse": 0.413743,
+              "n_rows": 1876,
+              "top1_agreement": 0.322086,
+              "mean_ranking_regret": 0.438344,
+              "median_ranking_regret": 0.4,
+              "n_encounters": 326,
+              "mean_eligible_candidates": 5.755,
+              "fold": 3
+            },
+            {
+              "mae": 0.325247,
+              "rmse": 0.401839,
+              "n_rows": 1875,
+              "top1_agreement": 0.26935,
+              "mean_ranking_regret": 0.432508,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 323,
+              "mean_eligible_candidates": 5.805,
+              "fold": 4
+            },
+            {
+              "mae": 0.325361,
+              "rmse": 0.404075,
+              "n_rows": 1874,
+              "top1_agreement": 0.286604,
+              "mean_ranking_regret": 0.400935,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 321,
+              "mean_eligible_candidates": 5.838,
+              "fold": 5
+            }
+          ]
+        }
+      ],
+      "selected": {
+        "params": {
+          "max_depth": 8,
+          "min_samples_leaf": 2,
+          "n_estimators": 150
+        },
+        "mae_mean": 0.329181,
+        "mae_std": 0.005165,
+        "rmse_mean": 0.407292,
+        "rmse_std": 0.005862,
+        "top1_agreement_mean": 0.301802,
+        "mean_ranking_regret_mean": 0.411255,
+        "median_ranking_regret_mean": 0.32,
+        "folds": [
+          {
+            "mae": 0.336586,
+            "rmse": 0.413474,
+            "n_rows": 1876,
+            "top1_agreement": 0.292453,
+            "mean_ranking_regret": 0.407862,
+            "median_ranking_regret": 0.3,
+            "n_encounters": 318,
+            "mean_eligible_candidates": 5.899,
+            "fold": 1
+          },
+          {
+            "mae": 0.332958,
+            "rmse": 0.412318,
+            "n_rows": 1876,
+            "top1_agreement": 0.27044,
+            "mean_ranking_regret": 0.463522,
+            "median_ranking_regret": 0.4,
+            "n_encounters": 318,
+            "mean_eligible_candidates": 5.899,
+            "fold": 2
+          },
+          {
+            "mae": 0.329302,
+            "rmse": 0.409972,
+            "n_rows": 1876,
+            "top1_agreement": 0.340491,
+            "mean_ranking_regret": 0.408282,
+            "median_ranking_regret": 0.3,
+            "n_encounters": 326,
+            "mean_eligible_candidates": 5.755,
+            "fold": 3
+          },
+          {
+            "mae": 0.323063,
+            "rmse": 0.39881,
+            "n_rows": 1875,
+            "top1_agreement": 0.297214,
+            "mean_ranking_regret": 0.404644,
+            "median_ranking_regret": 0.3,
+            "n_encounters": 323,
+            "mean_eligible_candidates": 5.805,
+            "fold": 4
+          },
+          {
+            "mae": 0.323998,
+            "rmse": 0.401886,
+            "n_rows": 1874,
+            "top1_agreement": 0.308411,
+            "mean_ranking_regret": 0.371963,
+            "median_ranking_regret": 0.3,
+            "n_encounters": 321,
+            "mean_eligible_candidates": 5.838,
+            "fold": 5
+          }
+        ]
+      }
+    },
+    "xgboost": {
+      "configs": [
+        {
+          "params": {
+            "learning_rate": 0.05,
+            "max_depth": 3,
+            "n_estimators": 150
+          },
+          "mae_mean": 0.328692,
+          "mae_std": 0.005186,
+          "rmse_mean": 0.407137,
+          "rmse_std": 0.005697,
+          "top1_agreement_mean": 0.309313,
+          "mean_ranking_regret_mean": 0.407724,
+          "median_ranking_regret_mean": 0.3,
+          "folds": [
+            {
+              "mae": 0.335583,
+              "rmse": 0.413344,
+              "n_rows": 1876,
+              "top1_agreement": 0.320755,
+              "mean_ranking_regret": 0.382075,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 318,
+              "mean_eligible_candidates": 5.899,
+              "fold": 1
+            },
+            {
+              "mae": 0.333927,
+              "rmse": 0.412502,
+              "n_rows": 1876,
+              "top1_agreement": 0.289308,
+              "mean_ranking_regret": 0.439308,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 318,
+              "mean_eligible_candidates": 5.899,
+              "fold": 2
+            },
+            {
+              "mae": 0.326737,
+              "rmse": 0.408119,
+              "n_rows": 1876,
+              "top1_agreement": 0.358896,
+              "mean_ranking_regret": 0.413804,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 326,
+              "mean_eligible_candidates": 5.755,
+              "fold": 3
+            },
+            {
+              "mae": 0.322185,
+              "rmse": 0.3981,
+              "n_rows": 1875,
+              "top1_agreement": 0.294118,
+              "mean_ranking_regret": 0.398762,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 323,
+              "mean_eligible_candidates": 5.805,
+              "fold": 4
+            },
+            {
+              "mae": 0.325029,
+              "rmse": 0.403621,
+              "n_rows": 1874,
+              "top1_agreement": 0.283489,
+              "mean_ranking_regret": 0.404673,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 321,
+              "mean_eligible_candidates": 5.838,
+              "fold": 5
+            }
+          ]
+        },
+        {
+          "params": {
+            "learning_rate": 0.05,
+            "max_depth": 6,
+            "n_estimators": 150
+          },
+          "mae_mean": 0.332831,
+          "mae_std": 0.005371,
+          "rmse_mean": 0.412906,
+          "rmse_std": 0.005954,
+          "top1_agreement_mean": 0.289469,
+          "mean_ranking_regret_mean": 0.429391,
+          "median_ranking_regret_mean": 0.34,
+          "folds": [
+            {
+              "mae": 0.340618,
+              "rmse": 0.418727,
+              "n_rows": 1876,
+              "top1_agreement": 0.308176,
+              "mean_ranking_regret": 0.419182,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 318,
+              "mean_eligible_candidates": 5.899,
+              "fold": 1
+            },
+            {
+              "mae": 0.337737,
+              "rmse": 0.419248,
+              "n_rows": 1876,
+              "top1_agreement": 0.264151,
+              "mean_ranking_regret": 0.480503,
+              "median_ranking_regret": 0.4,
+              "n_encounters": 318,
+              "mean_eligible_candidates": 5.899,
+              "fold": 2
+            },
+            {
+              "mae": 0.329703,
+              "rmse": 0.413296,
+              "n_rows": 1876,
+              "top1_agreement": 0.309816,
+              "mean_ranking_regret": 0.444172,
+              "median_ranking_regret": 0.4,
+              "n_encounters": 326,
+              "mean_eligible_candidates": 5.755,
+              "fold": 3
+            },
+            {
+              "mae": 0.326634,
+              "rmse": 0.403151,
+              "n_rows": 1875,
+              "top1_agreement": 0.28483,
+              "mean_ranking_regret": 0.402786,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 323,
+              "mean_eligible_candidates": 5.805,
+              "fold": 4
+            },
+            {
+              "mae": 0.329462,
+              "rmse": 0.41011,
+              "n_rows": 1874,
+              "top1_agreement": 0.280374,
+              "mean_ranking_regret": 0.400312,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 321,
+              "mean_eligible_candidates": 5.838,
+              "fold": 5
+            }
+          ]
+        },
+        {
+          "params": {
+            "learning_rate": 0.1,
+            "max_depth": 3,
+            "n_estimators": 150
+          },
+          "mae_mean": 0.329579,
+          "mae_std": 0.00526,
+          "rmse_mean": 0.408475,
+          "rmse_std": 0.005614,
+          "top1_agreement_mean": 0.3056,
+          "mean_ranking_regret_mean": 0.413012,
+          "median_ranking_regret_mean": 0.32,
+          "folds": [
+            {
+              "mae": 0.336814,
+              "rmse": 0.414546,
+              "n_rows": 1876,
+              "top1_agreement": 0.330189,
+              "mean_ranking_regret": 0.378931,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 318,
+              "mean_eligible_candidates": 5.899,
+              "fold": 1
+            },
+            {
+              "mae": 0.334905,
+              "rmse": 0.414638,
+              "n_rows": 1876,
+              "top1_agreement": 0.283019,
+              "mean_ranking_regret": 0.453774,
+              "median_ranking_regret": 0.4,
+              "n_encounters": 318,
+              "mean_eligible_candidates": 5.899,
+              "fold": 2
+            },
+            {
+              "mae": 0.326779,
+              "rmse": 0.40834,
+              "n_rows": 1876,
+              "top1_agreement": 0.358896,
+              "mean_ranking_regret": 0.415337,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 326,
+              "mean_eligible_candidates": 5.755,
+              "fold": 3
+            },
+            {
+              "mae": 0.323668,
+              "rmse": 0.400245,
+              "n_rows": 1875,
+              "top1_agreement": 0.278638,
+              "mean_ranking_regret": 0.418266,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 323,
+              "mean_eligible_candidates": 5.805,
+              "fold": 4
+            },
+            {
+              "mae": 0.325727,
+              "rmse": 0.404606,
+              "n_rows": 1874,
+              "top1_agreement": 0.277259,
+              "mean_ranking_regret": 0.398754,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 321,
+              "mean_eligible_candidates": 5.838,
+              "fold": 5
+            }
+          ]
+        },
+        {
+          "params": {
+            "learning_rate": 0.1,
+            "max_depth": 6,
+            "n_estimators": 150
+          },
+          "mae_mean": 0.336033,
+          "mae_std": 0.006092,
+          "rmse_mean": 0.41724,
+          "rmse_std": 0.007296,
+          "top1_agreement_mean": 0.277125,
+          "mean_ranking_regret_mean": 0.442897,
+          "median_ranking_regret_mean": 0.34,
+          "folds": [
+            {
+              "mae": 0.343652,
+              "rmse": 0.422029,
+              "n_rows": 1876,
+              "top1_agreement": 0.301887,
+              "mean_ranking_regret": 0.41761,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 318,
+              "mean_eligible_candidates": 5.899,
+              "fold": 1
+            },
+            {
+              "mae": 0.34205,
+              "rmse": 0.426396,
+              "n_rows": 1876,
+              "top1_agreement": 0.273585,
+              "mean_ranking_regret": 0.472013,
+              "median_ranking_regret": 0.4,
+              "n_encounters": 318,
+              "mean_eligible_candidates": 5.899,
+              "fold": 2
+            },
+            {
+              "mae": 0.335362,
+              "rmse": 0.419043,
+              "n_rows": 1876,
+              "top1_agreement": 0.285276,
+              "mean_ranking_regret": 0.470859,
+              "median_ranking_regret": 0.4,
+              "n_encounters": 326,
+              "mean_eligible_candidates": 5.755,
+              "fold": 3
+            },
+            {
+              "mae": 0.327707,
+              "rmse": 0.405358,
+              "n_rows": 1875,
+              "top1_agreement": 0.256966,
+              "mean_ranking_regret": 0.432817,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 323,
+              "mean_eligible_candidates": 5.805,
+              "fold": 4
+            },
+            {
+              "mae": 0.331393,
+              "rmse": 0.413373,
+              "n_rows": 1874,
+              "top1_agreement": 0.267913,
+              "mean_ranking_regret": 0.421184,
+              "median_ranking_regret": 0.3,
+              "n_encounters": 321,
+              "mean_eligible_candidates": 5.838,
+              "fold": 5
+            }
+          ]
+        }
+      ],
+      "selected": {
+        "params": {
+          "learning_rate": 0.05,
+          "max_depth": 3,
+          "n_estimators": 150
+        },
+        "mae_mean": 0.328692,
+        "mae_std": 0.005186,
+        "rmse_mean": 0.407137,
+        "rmse_std": 0.005697,
+        "top1_agreement_mean": 0.309313,
+        "mean_ranking_regret_mean": 0.407724,
+        "median_ranking_regret_mean": 0.3,
+        "folds": [
+          {
+            "mae": 0.335583,
+            "rmse": 0.413344,
+            "n_rows": 1876,
+            "top1_agreement": 0.320755,
+            "mean_ranking_regret": 0.382075,
+            "median_ranking_regret": 0.3,
+            "n_encounters": 318,
+            "mean_eligible_candidates": 5.899,
+            "fold": 1
+          },
+          {
+            "mae": 0.333927,
+            "rmse": 0.412502,
+            "n_rows": 1876,
+            "top1_agreement": 0.289308,
+            "mean_ranking_regret": 0.439308,
+            "median_ranking_regret": 0.3,
+            "n_encounters": 318,
+            "mean_eligible_candidates": 5.899,
+            "fold": 2
+          },
+          {
+            "mae": 0.326737,
+            "rmse": 0.408119,
+            "n_rows": 1876,
+            "top1_agreement": 0.358896,
+            "mean_ranking_regret": 0.413804,
+            "median_ranking_regret": 0.3,
+            "n_encounters": 326,
+            "mean_eligible_candidates": 5.755,
+            "fold": 3
+          },
+          {
+            "mae": 0.322185,
+            "rmse": 0.3981,
+            "n_rows": 1875,
+            "top1_agreement": 0.294118,
+            "mean_ranking_regret": 0.398762,
+            "median_ranking_regret": 0.3,
+            "n_encounters": 323,
+            "mean_eligible_candidates": 5.805,
+            "fold": 4
+          },
+          {
+            "mae": 0.325029,
+            "rmse": 0.403621,
+            "n_rows": 1874,
+            "top1_agreement": 0.283489,
+            "mean_ranking_regret": 0.404673,
+            "median_ranking_regret": 0.3,
+            "n_encounters": 321,
+            "mean_eligible_candidates": 5.838,
+            "fold": 5
+          }
+        ]
+      }
+    }
+  },
+  "selected_model": {
+    "name": "linear_regression",
+    "params": {},
+    "reason": "Selected by lowest mean grouped-Development-CV ranking regret, with MAE then RMSE as tie-breakers. Held-out test performance was not used for model choice. Ranking regret is the primary selection metric because the intended task is ranking eligible candidate opioids, not isolated row-wise regression.",
+    "development_cv": {
+      "params": {},
+      "mae_mean": 0.328056,
+      "mae_std": 0.005006,
+      "rmse_mean": 0.405824,
+      "rmse_std": 0.005822,
+      "top1_agreement_mean": 0.315594,
+      "mean_ranking_regret_mean": 0.398413,
+      "median_ranking_regret_mean": 0.3,
+      "folds": [
+        {
+          "mae": 0.335234,
+          "rmse": 0.412264,
+          "n_rows": 1876,
+          "top1_agreement": 0.333333,
+          "mean_ranking_regret": 0.373899,
+          "median_ranking_regret": 0.3,
+          "n_encounters": 318,
+          "mean_eligible_candidates": 5.899,
+          "fold": 1
+        },
+        {
+          "mae": 0.331659,
+          "rmse": 0.40987,
+          "n_rows": 1876,
+          "top1_agreement": 0.301887,
+          "mean_ranking_regret": 0.42044,
+          "median_ranking_regret": 0.3,
+          "n_encounters": 318,
+          "mean_eligible_candidates": 5.899,
+          "fold": 2
+        },
+        {
+          "mae": 0.328264,
+          "rmse": 0.409149,
+          "n_rows": 1876,
+          "top1_agreement": 0.352761,
+          "mean_ranking_regret": 0.407055,
+          "median_ranking_regret": 0.3,
+          "n_encounters": 326,
+          "mean_eligible_candidates": 5.755,
+          "fold": 3
+        },
+        {
+          "mae": 0.322116,
+          "rmse": 0.397305,
+          "n_rows": 1875,
+          "top1_agreement": 0.306502,
+          "mean_ranking_regret": 0.396904,
+          "median_ranking_regret": 0.3,
+          "n_encounters": 323,
+          "mean_eligible_candidates": 5.805,
+          "fold": 4
+        },
+        {
+          "mae": 0.323007,
+          "rmse": 0.400533,
+          "n_rows": 1874,
+          "top1_agreement": 0.283489,
+          "mean_ranking_regret": 0.393769,
+          "median_ranking_regret": 0.3,
+          "n_encounters": 321,
+          "mean_eligible_candidates": 5.838,
+          "fold": 5
+        }
+      ]
+    }
+  },
+  "held_out": {
+    "mae": 0.328784,
+    "rmse": 0.404984,
+    "n_rows": 2326,
+    "top1_agreement": 0.329949,
+    "mean_ranking_regret": 0.396447,
+    "median_ranking_regret": 0.3,
+    "n_encounters": 394,
+    "mean_eligible_candidates": 5.904
+  },
+  "subgroups": {
+    "sex": {
+      "Female": {
+        "mae": {
+          "n_rows": 1228,
+          "mae": 0.330599,
+          "insufficient_sample": false
+        },
+        "ranking": {
+          "top1_agreement": 0.328502,
+          "mean_ranking_regret": 0.386473,
+          "median_ranking_regret": 0.3,
+          "n_encounters": 207,
+          "mean_eligible_candidates": 5.932,
+          "insufficient_sample": false
+        }
+      },
+      "Male": {
+        "mae": {
+          "n_rows": 1098,
+          "mae": 0.326753,
+          "insufficient_sample": false
+        },
+        "ranking": {
+          "top1_agreement": 0.331551,
+          "mean_ranking_regret": 0.407487,
+          "median_ranking_regret": 0.2,
+          "n_encounters": 187,
+          "mean_eligible_candidates": 5.872,
+          "insufficient_sample": false
+        }
+      }
+    },
+    "genotype_available": {
+      "No": {
+        "mae": {
+          "n_rows": 1626,
+          "mae": 0.331381,
+          "insufficient_sample": false
+        },
+        "ranking": {
+          "top1_agreement": 0.345455,
+          "mean_ranking_regret": 0.385455,
+          "median_ranking_regret": 0.3,
+          "n_encounters": 275,
+          "mean_eligible_candidates": 5.913,
+          "insufficient_sample": false
+        }
+      },
+      "Yes": {
+        "mae": {
+          "n_rows": 700,
+          "mae": 0.322751,
+          "insufficient_sample": false
+        },
+        "ranking": {
+          "top1_agreement": 0.294118,
+          "mean_ranking_regret": 0.421849,
+          "median_ranking_regret": 0.3,
+          "n_encounters": 119,
+          "mean_eligible_candidates": 5.882,
+          "insufficient_sample": false
+        }
+      }
+    },
+    "opioid_tolerance": {
+      "No": {
+        "mae": {
+          "n_rows": 2192,
+          "mae": 0.328321,
+          "insufficient_sample": false
+        },
+        "ranking": {
+          "top1_agreement": 0.336927,
+          "mean_ranking_regret": 0.386253,
+          "median_ranking_regret": 0.2,
+          "n_encounters": 371,
+          "mean_eligible_candidates": 5.908,
+          "insufficient_sample": false
+        }
+      },
+      "Yes": {
+        "mae": {
+          "n_rows": 134,
+          "mae": 0.336353,
+          "insufficient_sample": false
+        },
+        "ranking": {
+          "top1_agreement": 0.217391,
+          "mean_ranking_regret": 0.56087,
+          "median_ranking_regret": 0.8,
+          "n_encounters": 23,
+          "mean_eligible_candidates": 5.826,
+          "insufficient_sample": true
+        }
+      }
+    },
+    "egfr": {
+      "eGFR<60": {
+        "mae": {
+          "n_rows": 36,
+          "mae": null,
+          "insufficient_sample": true
+        },
+        "ranking": {
+          "top1_agreement": 0.5,
+          "mean_ranking_regret": 0.4,
+          "median_ranking_regret": 0.3,
+          "n_encounters": 6,
+          "mean_eligible_candidates": 6.0,
+          "insufficient_sample": true
+        }
+      },
+      "eGFR>=60": {
+        "mae": {
+          "n_rows": 2290,
+          "mae": 0.328349,
+          "insufficient_sample": false
+        },
+        "ranking": {
+          "top1_agreement": 0.32732,
+          "mean_ranking_regret": 0.396392,
+          "median_ranking_regret": 0.3,
+          "n_encounters": 388,
+          "mean_eligible_candidates": 5.902,
+          "insufficient_sample": false
+        }
+      }
+    },
+    "voc_utilization": {
+      "high_VOC(>=6)": {
+        "mae": {
+          "n_rows": 646,
+          "mae": 0.334115,
+          "insufficient_sample": false
+        },
+        "ranking": {
+          "top1_agreement": 0.290909,
+          "mean_ranking_regret": 0.432727,
+          "median_ranking_regret": 0.4,
+          "n_encounters": 110,
+          "mean_eligible_candidates": 5.873,
+          "insufficient_sample": false
+        }
+      },
+      "lower_VOC(<6)": {
+        "mae": {
+          "n_rows": 1680,
+          "mae": 0.326734,
+          "insufficient_sample": false
+        },
+        "ranking": {
+          "top1_agreement": 0.34507,
+          "mean_ranking_regret": 0.382394,
+          "median_ranking_regret": 0.2,
+          "n_encounters": 284,
+          "mean_eligible_candidates": 5.915,
+          "insufficient_sample": false
+        }
+      }
+    },
+    "candidate_opioid_mae": {
+      "Codeine": {
+        "n_rows": 386,
+        "mae": 0.282575,
+        "insufficient_sample": false
+      },
+      "Fentanyl": {
+        "n_rows": 389,
+        "mae": 0.368823,
+        "insufficient_sample": false
+      },
+      "Hydromorphone": {
+        "n_rows": 394,
+        "mae": 0.366593,
+        "insufficient_sample": false
+      },
+      "Morphine": {
+        "n_rows": 388,
+        "mae": 0.373829,
+        "insufficient_sample": false
+      },
+      "Oxycodone": {
+        "n_rows": 390,
+        "mae": 0.291914,
+        "insufficient_sample": false
+      },
+      "Tramadol": {
+        "n_rows": 379,
+        "mae": 0.287269,
+        "insufficient_sample": false
+      }
+    },
+    "model_selected_opioid_ranking": {
+      "Codeine": {
+        "n_encounters": 0,
+        "mean_ranking_regret": null,
+        "insufficient_sample": true
+      },
+      "Fentanyl": {
+        "n_encounters": 44,
+        "mean_ranking_regret": 0.293182,
+        "median_ranking_regret": 0.2,
+        "insufficient_sample": false
+      },
+      "Hydromorphone": {
+        "n_encounters": 88,
+        "mean_ranking_regret": 0.4125,
+        "median_ranking_regret": 0.25,
+        "insufficient_sample": false
+      },
+      "Morphine": {
+        "n_encounters": 262,
+        "mean_ranking_regret": 0.408397,
+        "median_ranking_regret": 0.3,
+        "insufficient_sample": false
+      },
+      "Oxycodone": {
+        "n_encounters": 0,
+        "mean_ranking_regret": null,
+        "insufficient_sample": true
+      },
+      "Tramadol": {
+        "n_encounters": 0,
+        "mean_ranking_regret": null,
+        "insufficient_sample": true
+      }
+    }
+  },
+  "warnings": [
+    "Training on synthetic potential outcomes may make the model learn the simulator's structural assumptions.",
+    "Performance reflects recovery of an evidence-informed synthetic simulation and does not establish clinical predictive validity."
+  ],
+  "limitations": [
+    "Performance reflects recovery of an evidence-informed synthetic simulation and does not establish clinical predictive validity.",
+    "This is simulation-only / synthetic oracle evaluation, not clinical validation or real-world predictive performance."
+  ],
+  "artifact_paths": {
+    "model": "ml/models/scdaid_response_model.joblib",
+    "feature_schema": "ml/models/feature_schema.json",
+    "report_json": "ml/model_report.json",
+    "report_md": "ml/model_report.md"
+  }
+}
