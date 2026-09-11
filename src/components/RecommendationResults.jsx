@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   AlertTriangle,
   BarChart3,
@@ -13,7 +13,8 @@ import {
   Search,
   ShieldAlert,
 } from 'lucide-react'
-import { LOADING_STEPS, formatRecommendationReport } from '../data/recommendation.js'
+import { LOADING_STEPS } from '../data/recommendation.js'
+import { useAuth } from '../context/AuthContext.jsx'
 
 function EligibilityBadge({ status }) {
   const key =
@@ -43,17 +44,46 @@ export function RecommendationResults({ result, form, loading, loadingStep = 0 }
   const [openAlt, setOpenAlt] = useState(null)
   const [shapOpen, setShapOpen] = useState(true)
   const [query, setQuery] = useState('')
+  const [downloading, setDownloading] = useState(false)
+  const generatorRef = useRef(null)
+  const { user } = useAuth()
+
+  useEffect(() => {
+    let cancelled = false
+    import('../report/generateScdaidReport.js')
+      .then((mod) => {
+        if (!cancelled) generatorRef.current = mod
+      })
+      .catch(() => {
+        /* the click handler reports a missing engine */
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const handleDownload = () => {
-    if (!result) return
-    const content = formatRecommendationReport(result, form)
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = 'SCDAid-recommendation-report.txt'
-    link.click()
-    URL.revokeObjectURL(url)
+    if (!result || loading || downloading) return
+    const generator = generatorRef.current
+    if (!generator) {
+      window.alert('The report engine is still loading. Please try again in a moment.')
+      import('../report/generateScdaidReport.js')
+        .then((mod) => {
+          generatorRef.current = mod
+        })
+        .catch((error) => {
+          window.alert(error?.message || 'The report could not be generated.')
+        })
+      return
+    }
+    setDownloading(true)
+    try {
+      generator.generateScdaidReport({ form, result, user })
+    } catch (error) {
+      window.alert(error?.message || 'The report could not be generated.')
+    } finally {
+      setDownloading(false)
+    }
   }
 
   const pgx = result?.pgx
@@ -110,10 +140,15 @@ export function RecommendationResults({ result, form, loading, loadingStep = 0 }
           type="button"
           className="btn btn-outline btn-sm"
           onClick={handleDownload}
-          disabled={!result || loading}
+          disabled={!result || loading || downloading}
+          title={
+            !result
+              ? 'Complete an assessment before downloading a report.'
+              : 'Download the SCDAid clinical recommendation report as a PDF'
+          }
         >
           <Download size={14} />
-          Download Report
+          {downloading ? 'Preparing PDF…' : 'Download Report'}
         </button>
       </header>
 
