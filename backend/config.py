@@ -37,6 +37,8 @@ _DEFAULT_CORS = (
     "http://127.0.0.1:5173",
     "http://localhost:5175",
     "http://127.0.0.1:5175",
+    "https://masheljmil123-svg.github.io",
+    "https://masheljmi1123-svg.github.io",
 )
 
 
