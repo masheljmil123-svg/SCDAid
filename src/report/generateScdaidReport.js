@@ -17,10 +17,9 @@ import {
 } from './reportHelpers.js'
 
 const CONTENT_WIDTH = PAGE.width - PAGE.marginX * 2
-const COL_GAP = 3.2
-const COL_WIDTH = (CONTENT_WIDTH - COL_GAP) / 2
 const LOGO_H = 11
 const LOGO_W = LOGO_H * (1024 / 341)
+const SECTION_BLOCK_MIN = 28
 
 function rgb(doc, color) {
   doc.setTextColor(...color)
@@ -39,15 +38,8 @@ function pdfFilename(name) {
   return /\.pdf$/i.test(base) ? base.replace(/\.pdf$/i, '.pdf') : `${base}.pdf`
 }
 
-function sectionTitle(doc, title, y, x = PAGE.marginX) {
-  rgb(doc, COLORS.burgundy)
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(TYPE.section)
-  doc.text(title, x, y)
-  stroke(doc, COLORS.primary)
-  doc.setLineWidth(0.28)
-  doc.line(x, y + 1, x + 14, y + 1)
-  return y + 4.2
+function sectionSubtitle(section) {
+  return section === 'outputs' ? COPY.page2Subtitle : COPY.page1Subtitle
 }
 
 function drawHeader(doc, { logo, cells }, subtitle) {
@@ -65,26 +57,26 @@ function drawHeader(doc, { logo, cells }, subtitle) {
   rgb(doc, COLORS.primary)
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(TYPE.small)
-  doc.text(COPY.kicker, PAGE.marginX, 21.4)
+  doc.text(COPY.kicker, PAGE.marginX, 20.6)
 
   rgb(doc, COLORS.burgundy)
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(TYPE.title)
-  doc.text(COPY.title, PAGE.marginX, 26.8)
+  doc.text(COPY.title, PAGE.marginX, 27.6)
 
   rgb(doc, COLORS.primaryDark)
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(TYPE.subtitle)
-  doc.text(subtitle, PAGE.marginX, 31.4)
+  doc.text(subtitle, PAGE.marginX, 33.4)
 
   rgb(doc, COLORS.muted)
   doc.setFont('helvetica', 'italic')
   doc.setFontSize(TYPE.small)
-  doc.text(COPY.tagline, PAGE.marginX, 35.6)
+  doc.text(COPY.tagline, PAGE.marginX, 38.4)
 
   stroke(doc, COLORS.border)
   doc.setLineWidth(0.22)
-  doc.line(PAGE.marginX, 37.4, PAGE.width - PAGE.marginX, 37.4)
+  doc.line(PAGE.marginX, PAGE.headerBottom, PAGE.width - PAGE.marginX, PAGE.headerBottom)
 }
 
 function drawMetadataStrip(doc, meta, clinicianName, y) {
@@ -97,7 +89,7 @@ function drawMetadataStrip(doc, meta, clinicianName, y) {
   if (clinicianName) cells.push(['Clinician', clinicianName])
 
   const rows = Math.ceil(cells.length / 3)
-  const height = 5.8 * rows + 2.2
+  const height = 6.4 * rows + 2.6
   fill(doc, COLORS.blush)
   doc.roundedRect(PAGE.marginX, y, CONTENT_WIDTH, height, 1.2, 1.2, 'F')
 
@@ -106,21 +98,21 @@ function drawMetadataStrip(doc, meta, clinicianName, y) {
     const col = index % 3
     const row = Math.floor(index / 3)
     const x = PAGE.marginX + 3 + col * colW
-    const cy = y + 3.1 + row * 5.4
+    const cy = y + 3.4 + row * 5.8
     rgb(doc, COLORS.muted)
     doc.setFont('helvetica', 'bold')
-    doc.setFontSize(5.9)
+    doc.setFontSize(7)
     doc.text(pair[0].toUpperCase(), x, cy)
     rgb(doc, COLORS.ink)
     doc.setFont('helvetica', 'normal')
-    doc.setFontSize(7)
-    doc.text(String(pair[1]), x, cy + 3)
+    doc.setFontSize(TYPE.meta)
+    doc.text(String(pair[1]), x, cy + 3.3)
   })
 
-  return y + height + 4
+  return y + height + 5
 }
 
-function drawFooter(doc, pageNumber) {
+function drawFooter(doc, pageNumber, totalPages) {
   stroke(doc, COLORS.border)
   doc.setLineWidth(0.18)
   doc.line(PAGE.marginX, PAGE.footerY - 3, PAGE.width - PAGE.marginX, PAGE.footerY - 3)
@@ -130,191 +122,193 @@ function drawFooter(doc, pageNumber) {
   doc.setFontSize(TYPE.footer)
   doc.text(COPY.footerLeft, PAGE.marginX, PAGE.footerY)
   doc.text(COPY.footerCenter, PAGE.width / 2, PAGE.footerY, { align: 'center' })
-  doc.text(`Page ${pageNumber} of 2`, PAGE.width - PAGE.marginX, PAGE.footerY, { align: 'right' })
+  doc.text(`Page ${pageNumber} of ${totalPages}`, PAGE.width - PAGE.marginX, PAGE.footerY, {
+    align: 'right',
+  })
 }
 
-function addTable(doc, startY, head, body, columnStyles = {}, options = {}) {
-  const x = options.x ?? PAGE.marginX
-  const width = options.width ?? CONTENT_WIDTH
+function decorateCurrentPage(ctx) {
+  const page = ctx.doc.internal.getCurrentPageInfo().pageNumber
+  if (ctx.decorated.has(page)) return
+  ctx.decorated.add(page)
+  drawHeader(ctx.doc, ctx.images, sectionSubtitle(ctx.section))
+}
+
+function addReportPage(ctx) {
+  ctx.doc.addPage('a4', 'portrait')
+  decorateCurrentPage(ctx)
+  return PAGE.contentStartY
+}
+
+function ensureSpace(ctx, y, needed) {
+  if (y + needed <= PAGE.contentBottom) return y
+  return addReportPage(ctx)
+}
+
+function sectionTitle(ctx, title, y) {
+  y = ensureSpace(ctx, y, SECTION_BLOCK_MIN)
+  const { doc } = ctx
+  rgb(doc, COLORS.burgundy)
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(TYPE.section)
+  doc.text(title, PAGE.marginX, y)
+  stroke(doc, COLORS.primary)
+  doc.setLineWidth(0.3)
+  doc.line(PAGE.marginX, y + 1.2, PAGE.marginX + 16, y + 1.2)
+  return y + 6
+}
+
+function tableMargins() {
+  return {
+    left: PAGE.marginX,
+    right: PAGE.marginX,
+    top: PAGE.contentStartY,
+    bottom: 20,
+  }
+}
+
+function addTable(ctx, startY, head, body, columnStyles = {}) {
   const rows = body.length
     ? body
     : [head.map((_, index) => (index === 0 ? 'Not provided' : '—'))]
 
-  autoTable(doc, {
+  autoTable(ctx.doc, {
     ...tableTheme(),
     startY,
-    margin: { left: x, right: PAGE.width - x - width, bottom: 16 },
-    tableWidth: width,
+    margin: tableMargins(),
+    tableWidth: CONTENT_WIDTH,
     head: [head],
     body: rows,
     columnStyles,
-    pageBreak: 'avoid',
+    pageBreak: 'auto',
     rowPageBreak: false,
     horizontalPageBreak: false,
-  })
-  return doc.lastAutoTable.finalY + 2.6
-}
-
-function kvTable(doc, y, rows, options = {}) {
-  const width = options.width ?? CONTENT_WIDTH
-  return addTable(
-    doc,
-    y,
-    ['Field', 'Value'],
-    rows,
-    {
-      0: { cellWidth: Math.min(36, width * 0.42), fontStyle: 'bold', textColor: COLORS.burgundy },
-      1: { cellWidth: width - Math.min(36, width * 0.42) },
+    showHead: 'everyPage',
+    willDrawPage: () => {
+      decorateCurrentPage(ctx)
     },
-    options,
-  )
+    didDrawPage: () => {
+      decorateCurrentPage(ctx)
+    },
+  })
+  return ctx.doc.lastAutoTable.finalY + 4
 }
 
-function page1Content(doc, form, result, y) {
-  const leftX = PAGE.marginX
-  const rightX = PAGE.marginX + COL_WIDTH + COL_GAP
-  let leftY = y
-  let rightY = y
+function kvTable(ctx, y, rows) {
+  return addTable(ctx, y, ['Field', 'Value'], rows, {
+    0: { cellWidth: 62, fontStyle: 'bold', textColor: COLORS.burgundy },
+    1: { cellWidth: CONTENT_WIDTH - 62 },
+  })
+}
 
-  leftY = sectionTitle(doc, 'A. Patient & VOC', leftY, leftX)
-  leftY = kvTable(
-    doc,
-    leftY,
+function drawInputSections(ctx, form, result, y) {
+  y = sectionTitle(ctx, 'A. Patient & VOC', y)
+  y = kvTable(ctx, y, [
+    ['Age', form.age === '' || form.age == null ? 'Not provided' : `${form.age} years`],
+    ['Sex', displayValue(form.sex)],
+    ['Weight', form.weight === '' || form.weight == null ? 'Not provided' : `${form.weight} kg`],
+    ['BMI', form.bmi === '' || form.bmi == null ? 'Not provided' : String(form.bmi)],
     [
-      ['Age', form.age === '' || form.age == null ? 'Not provided' : `${form.age} years`],
-      ['Sex', displayValue(form.sex)],
-      ['Weight', form.weight === '' || form.weight == null ? 'Not provided' : `${form.weight} kg`],
-      ['BMI', form.bmi === '' || form.bmi == null ? 'Not provided' : String(form.bmi)],
-      [
-        'Baseline pain score',
-        form.baselinePainScore === '' || form.baselinePainScore == null
-          ? 'Not provided'
-          : `${form.baselinePainScore} / 10`,
-      ],
-      ['SCD genotype', displayValue(form.scdGenotype)],
-      ['VOC history', displayValue(form.vocHistory)],
-      [
-        'Relevant comorbidities',
-        form.comorbidities?.length ? form.comorbidities.join(', ') : 'Not provided',
-      ],
+      'Baseline pain score',
+      form.baselinePainScore === '' || form.baselinePainScore == null
+        ? 'Not provided'
+        : `${form.baselinePainScore} / 10`,
     ],
-    { x: leftX, width: COL_WIDTH },
-  )
+    ['SCD genotype', displayValue(form.scdGenotype)],
+    ['VOC history', displayValue(form.vocHistory)],
+    [
+      'Relevant comorbidities',
+      form.comorbidities?.length ? form.comorbidities.join(', ') : 'Not provided',
+    ],
+  ])
 
-  leftY = sectionTitle(doc, 'B. Relevant Vital Signs', leftY, leftX)
+  y = sectionTitle(ctx, 'B. Relevant Vital Signs', y)
   const vitalRows = filledRows(form.vitalSigns, (row) => [
     tableCell(row.name),
     tableCell(row.value),
     tableCell(row.unit),
   ])
-  leftY = addTable(doc, leftY, ['Parameter', 'Value', 'Unit'], vitalRows, {
-    0: { cellWidth: COL_WIDTH * 0.42 },
-    1: { cellWidth: COL_WIDTH * 0.28 },
-    2: { cellWidth: COL_WIDTH * 0.3 },
-  }, { x: leftX, width: COL_WIDTH })
+  y = addTable(ctx, y, ['Parameter', 'Value', 'Unit'], vitalRows, {
+    0: { cellWidth: 70 },
+    1: { cellWidth: 50 },
+    2: { cellWidth: CONTENT_WIDTH - 120 },
+  })
 
-  leftY = sectionTitle(doc, 'C. Organ Function', leftY, leftX)
-  leftY = kvTable(
-    doc,
-    leftY,
+  y = sectionTitle(ctx, 'C. Organ Function', y)
+  y = kvTable(ctx, y, [
     [
-      [
-        'Serum creatinine',
-        form.serumCreatinine === '' || form.serumCreatinine == null
-          ? 'Not provided'
-          : String(form.serumCreatinine),
-      ],
-      ['Creatinine unit', displayValue(form.creatinineUnit)],
-      [
-        'eGFR',
-        form.egfr === '' || form.egfr == null ? 'Not provided' : `${form.egfr} mL/min/1.73m²`,
-      ],
+      'Serum creatinine',
+      form.serumCreatinine === '' || form.serumCreatinine == null
+        ? 'Not provided'
+        : String(form.serumCreatinine),
     ],
-    { x: leftX, width: COL_WIDTH },
-  )
+    ['Creatinine unit', displayValue(form.creatinineUnit)],
+    [
+      'eGFR',
+      form.egfr === '' || form.egfr == null ? 'Not provided' : `${form.egfr} mL/min/1.73m²`,
+    ],
+  ])
   const liverRows = filledRows(form.liverTests, (row) => [
     tableCell(row.name),
     tableCell(row.value),
     tableCell(row.unit),
   ])
-  leftY = addTable(doc, leftY, ['Liver test', 'Value', 'Unit'], liverRows, {
-    0: { cellWidth: COL_WIDTH * 0.42 },
-    1: { cellWidth: COL_WIDTH * 0.28 },
-    2: { cellWidth: COL_WIDTH * 0.3 },
-  }, { x: leftX, width: COL_WIDTH })
+  y = addTable(ctx, y, ['Liver test', 'Value', 'Unit'], liverRows, {
+    0: { cellWidth: 70 },
+    1: { cellWidth: 50 },
+    2: { cellWidth: CONTENT_WIDTH - 120 },
+  })
 
-  rightY = sectionTitle(doc, 'D. Current Medications', rightY, rightX)
-  rightY = addTable(
-    doc,
-    rightY,
-    ['Medication', 'Relevant flag'],
-    medicationRows(form, result?.pgx),
-    {
-      0: { cellWidth: COL_WIDTH * 0.46 },
-      1: { cellWidth: COL_WIDTH * 0.54 },
-    },
-    { x: rightX, width: COL_WIDTH },
-  )
+  y = sectionTitle(ctx, 'D. Current Medications', y)
+  y = addTable(ctx, y, ['Medication', 'Relevant flag'], medicationRows(form, result?.pgx), {
+    0: { cellWidth: 78 },
+    1: { cellWidth: CONTENT_WIDTH - 78 },
+  })
 
-  rightY = sectionTitle(doc, 'E. Baseline Opioid Therapy', rightY, rightX)
+  y = sectionTitle(ctx, 'E. Baseline Opioid Therapy', y)
   if (form.noBaselineOpioid) {
-    rightY = kvTable(
-      doc,
-      rightY,
-      [['Baseline opioid therapy', 'No baseline opioid therapy']],
-      { x: rightX, width: COL_WIDTH },
-    )
+    y = kvTable(ctx, y, [['Baseline opioid therapy', 'No baseline opioid therapy']])
   } else {
     const baselineRows = filledRows(form.baselineOpioids, (row) => [
       tableCell(row.drug),
       tableCell(row.dose),
       tableCell(row.route),
     ])
-    rightY = addTable(doc, rightY, ['Opioid / drug', 'Dose', 'Route'], baselineRows, {
-      0: { cellWidth: COL_WIDTH * 0.4 },
-      1: { cellWidth: COL_WIDTH * 0.28 },
-      2: { cellWidth: COL_WIDTH * 0.32 },
-    }, { x: rightX, width: COL_WIDTH })
+    y = addTable(ctx, y, ['Opioid / drug', 'Dose', 'Route'], baselineRows, {
+      0: { cellWidth: 70 },
+      1: { cellWidth: 50 },
+      2: { cellWidth: CONTENT_WIDTH - 120 },
+    })
   }
 
-  rightY = sectionTitle(doc, 'F. Opioid Tolerance', rightY, rightX)
-  rightY = kvTable(
-    doc,
-    rightY,
-    [['Opioid tolerance', yesNo(form.opioidTolerance)]],
-    { x: rightX, width: COL_WIDTH },
-  )
+  y = sectionTitle(ctx, 'F. Opioid Tolerance', y)
+  y = kvTable(ctx, y, [['Opioid tolerance', yesNo(form.opioidTolerance)]])
 
-  rightY = sectionTitle(doc, 'G. Previous Opioid Response', rightY, rightX)
+  y = sectionTitle(ctx, 'G. Previous Opioid Response', y)
   const previousRows = filledRows(form.previousResponses, (row) => [
     tableCell(row.opioid),
     tableCell(row.response),
   ])
-  rightY = addTable(doc, rightY, ['Opioid', 'Previous response'], previousRows, {
-    0: { cellWidth: COL_WIDTH * 0.42 },
-    1: { cellWidth: COL_WIDTH * 0.58 },
-  }, { x: rightX, width: COL_WIDTH })
+  y = addTable(ctx, y, ['Opioid', 'Previous response'], previousRows, {
+    0: { cellWidth: 78 },
+    1: { cellWidth: CONTENT_WIDTH - 78 },
+  })
 
-  rightY = sectionTitle(doc, 'H. Allergy / Intolerance', rightY, rightX)
+  y = sectionTitle(ctx, 'H. Allergy / Intolerance', y)
   if (form.noKnownAllergy) {
-    rightY = kvTable(
-      doc,
-      rightY,
-      [['Allergy / intolerance', 'No known opioid allergy/intolerance']],
-      { x: rightX, width: COL_WIDTH },
-    )
+    y = kvTable(ctx, y, [['Allergy / intolerance', 'No known opioid allergy/intolerance']])
   } else {
     const allergyRows = filledRows(form.allergies, (row) => [
       tableCell(row.drug),
       tableCell(row.reaction),
     ])
-    rightY = addTable(doc, rightY, ['Drug', 'Reaction'], allergyRows, {
-      0: { cellWidth: COL_WIDTH * 0.42 },
-      1: { cellWidth: COL_WIDTH * 0.58 },
-    }, { x: rightX, width: COL_WIDTH })
+    y = addTable(ctx, y, ['Drug', 'Reaction'], allergyRows, {
+      0: { cellWidth: 78 },
+      1: { cellWidth: CONTENT_WIDTH - 78 },
+    })
   }
 
-  rightY = sectionTitle(doc, 'I. CYP2D6 Pharmacogenomics Inputs', rightY, rightX)
+  y = sectionTitle(ctx, 'I. CYP2D6 Pharmacogenomics Inputs', y)
   const pgxRows = [['CYP2D6 genotype available?', yesNo(form.genotypeAvailable)]]
   if (form.genotypeAvailable === 'Yes') {
     pgxRows.push(
@@ -329,13 +323,15 @@ function page1Content(doc, form, result, y) {
       )
     }
   }
-  rightY = kvTable(doc, rightY, pgxRows, { x: rightX, width: COL_WIDTH })
-  return Math.max(leftY, rightY)
+  return kvTable(ctx, y, pgxRows)
 }
 
-function drawTopRankedCard(doc, result, y) {
+function drawTopRankedCard(ctx, result, y) {
   const preferred = result?.preferred
-  const height = preferred ? 26 : 16
+  const height = preferred ? 32 : 20
+  y = ensureSpace(ctx, y, height + 4)
+  const { doc } = ctx
+
   fill(doc, COLORS.blush)
   doc.roundedRect(PAGE.marginX, y, CONTENT_WIDTH, height, 1.6, 1.6, 'F')
   stroke(doc, [248, 214, 219])
@@ -345,7 +341,7 @@ function drawTopRankedCard(doc, result, y) {
   rgb(doc, COLORS.primary)
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(TYPE.small)
-  doc.text('Top-Ranked Option', PAGE.marginX + 4, y + 4.6)
+  doc.text('Top-Ranked Option', PAGE.marginX + 4, y + 5.4)
 
   if (!preferred) {
     rgb(doc, COLORS.ink)
@@ -355,34 +351,34 @@ function drawTopRankedCard(doc, result, y) {
       ? result.mlError
       : 'No rankable opioid remains after safety review.'
     const lines = doc.splitTextToSize(message, CONTENT_WIDTH - 8)
-    doc.text(lines, PAGE.marginX + 4, y + 10)
-    return y + height + 3.4
+    doc.text(lines, PAGE.marginX + 4, y + 12)
+    return y + height + 5
   }
 
   rgb(doc, COLORS.burgundy)
   doc.setFont('helvetica', 'bold')
-  doc.setFontSize(15)
-  doc.text(preferred.name, PAGE.marginX + 4, y + 12)
+  doc.setFontSize(16)
+  doc.text(preferred.name, PAGE.marginX + 4, y + 14.2)
 
   rgb(doc, COLORS.text)
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(TYPE.body)
-  doc.text(`Eligibility: ${eligibilityLabel(preferred.eligibility)}`, PAGE.marginX + 4, y + 17.2)
+  doc.text(`Eligibility: ${eligibilityLabel(preferred.eligibility)}`, PAGE.marginX + 4, y + 20.4)
 
   rgb(doc, COLORS.ink)
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(TYPE.small)
-  doc.text('Predicted pain reduction at 60 min', PAGE.marginX + 88, y + 9.2)
-  doc.setFontSize(13)
+  doc.text('Predicted pain reduction at 60 min', PAGE.marginX + 92, y + 10.4)
+  doc.setFontSize(14)
   rgb(doc, COLORS.primaryDark)
-  doc.text(predictedDeltaLabel(preferred), PAGE.marginX + 88, y + 16)
+  doc.text(predictedDeltaLabel(preferred), PAGE.marginX + 92, y + 18)
 
   rgb(doc, COLORS.muted)
   doc.setFont('helvetica', 'italic')
-  doc.setFontSize(6.1)
-  doc.text(COPY.predictionNote, PAGE.marginX + 4, y + 22.8)
+  doc.setFontSize(TYPE.small)
+  doc.text(COPY.predictionNote, PAGE.marginX + 4, y + 27.2)
 
-  return y + height + 3.8
+  return y + height + 5
 }
 
 function pgxOutputRows(pgx = {}) {
@@ -479,10 +475,10 @@ function safetyRows(form, result) {
   return rows
 }
 
-function page2Content(doc, form, result, y) {
-  y = drawTopRankedCard(doc, result, y)
+function drawOutputSections(ctx, form, result, y) {
+  y = drawTopRankedCard(ctx, result, y)
 
-  y = sectionTitle(doc, 'Ranked Opioid Strategies', y)
+  y = sectionTitle(ctx, 'Ranked Opioid Strategies', y)
   const ranked = rankedOpioids(result).map((item, index) => [
     String(index + 1),
     item.name,
@@ -491,22 +487,29 @@ function page2Content(doc, form, result, y) {
     item.note || (item.reasons?.length ? item.reasons.join(' ') : '—'),
   ])
 
-  autoTable(doc, {
+  autoTable(ctx.doc, {
     ...tableTheme(),
     startY: y,
-    margin: { left: PAGE.marginX, right: PAGE.marginX, bottom: 16 },
+    margin: tableMargins(),
     tableWidth: CONTENT_WIDTH,
     head: [['Rank', 'Opioid', 'Eligibility', 'Predicted dPain60', 'Key clinical notes']],
     body: ranked,
-    pageBreak: 'avoid',
+    pageBreak: 'auto',
     rowPageBreak: false,
     horizontalPageBreak: false,
+    showHead: 'everyPage',
     columnStyles: {
-      0: { cellWidth: 12, halign: 'center' },
-      1: { cellWidth: 30 },
-      2: { cellWidth: 22 },
-      3: { cellWidth: 32 },
-      4: { cellWidth: CONTENT_WIDTH - 96 },
+      0: { cellWidth: 14, halign: 'center' },
+      1: { cellWidth: 32 },
+      2: { cellWidth: 24 },
+      3: { cellWidth: 34 },
+      4: { cellWidth: CONTENT_WIDTH - 104 },
+    },
+    willDrawPage: () => {
+      decorateCurrentPage(ctx)
+    },
+    didDrawPage: () => {
+      decorateCurrentPage(ctx)
     },
     didParseCell: (data) => {
       if (data.section !== 'body' || data.column.index !== 2) return
@@ -526,51 +529,90 @@ function page2Content(doc, form, result, y) {
       }
     },
   })
-  y = doc.lastAutoTable.finalY + 3.2
+  y = ctx.doc.lastAutoTable.finalY + 5
 
-  y = sectionTitle(doc, 'Dose Guidance', y)
-  fill(doc, [252, 250, 249])
-  doc.roundedRect(PAGE.marginX, y - 2, CONTENT_WIDTH, 7.6, 1.1, 1.1, 'F')
-  rgb(doc, COLORS.ink)
-  doc.setFont('helvetica', 'italic')
-  doc.setFontSize(TYPE.body)
-  doc.text(COPY.doseStatement, PAGE.marginX + 3, y + 2.6)
-  y += 8.6
+  y = sectionTitle(ctx, 'Dose Guidance', y)
+  const doseHeight = 10
+  y = ensureSpace(ctx, y, doseHeight + 2)
+  fill(ctx.doc, [252, 250, 249])
+  ctx.doc.roundedRect(PAGE.marginX, y - 2.2, CONTENT_WIDTH, doseHeight, 1.1, 1.1, 'F')
+  rgb(ctx.doc, COLORS.ink)
+  ctx.doc.setFont('helvetica', 'italic')
+  ctx.doc.setFontSize(TYPE.body)
+  ctx.doc.text(COPY.doseStatement, PAGE.marginX + 3.2, y + 3.6)
+  y += doseHeight + 4
 
-  y = sectionTitle(doc, 'Pharmacogenomic Findings', y)
-  y = kvTable(doc, y, pgxOutputRows(result?.pgx || {}))
+  y = sectionTitle(ctx, 'Pharmacogenomic Findings', y)
+  y = kvTable(ctx, y, pgxOutputRows(result?.pgx || {}))
 
-  y = sectionTitle(doc, 'Safety Findings', y)
-  y = addTable(doc, y, ['Category', 'Finding', 'Clinical interpretation'], safetyRows(form, result), {
-    0: { cellWidth: 36 },
-    1: { cellWidth: 46 },
-    2: { cellWidth: CONTENT_WIDTH - 82 },
-  })
+  y = sectionTitle(ctx, 'Safety Findings', y)
+  y = addTable(
+    ctx,
+    y,
+    ['Category', 'Finding', 'Clinical interpretation'],
+    safetyRows(form, result),
+    {
+      0: { cellWidth: 40 },
+      1: { cellWidth: 48 },
+      2: { cellWidth: CONTENT_WIDTH - 88 },
+    },
+  )
 
-  y = sectionTitle(doc, 'Rule-Based Findings', y)
+  y = sectionTitle(ctx, 'Rule-Based Findings', y)
   const findings = result?.explanation?.findings || []
   const findingRows = findings.length
     ? findings.map((finding, index) => [String(index + 1), finding])
     : [['—', 'No rule-based findings were returned for this assessment.']]
-  y = addTable(doc, y, ['#', 'Finding'], findingRows, {
-    0: { cellWidth: 9, halign: 'center' },
-    1: { cellWidth: CONTENT_WIDTH - 9 },
+  y = addTable(ctx, y, ['#', 'Finding'], findingRows, {
+    0: { cellWidth: 12, halign: 'center' },
+    1: { cellWidth: CONTENT_WIDTH - 12 },
   })
 
+  const { doc } = ctx
   const lines = doc.splitTextToSize(COPY.disclaimer, CONTENT_WIDTH - 8)
-  const boxH = Math.min(18, 5.2 + lines.length * 2.85)
-  const boxTop = Math.max(y, PAGE.contentBottom - boxH)
+  const boxH = 8 + lines.length * 3.6
+  y = ensureSpace(ctx, y, boxH + 2)
   fill(doc, COLORS.blush)
-  doc.roundedRect(PAGE.marginX, boxTop, CONTENT_WIDTH, boxH, 1.2, 1.2, 'F')
+  doc.roundedRect(PAGE.marginX, y, CONTENT_WIDTH, boxH, 1.2, 1.2, 'F')
   rgb(doc, COLORS.burgundy)
   doc.setFont('helvetica', 'bold')
-  doc.setFontSize(6.2)
-  doc.text('DISCLAIMER', PAGE.marginX + 3, boxTop + 3.3)
+  doc.setFontSize(TYPE.small)
+  doc.text('DISCLAIMER', PAGE.marginX + 3.2, y + 4.2)
   rgb(doc, COLORS.ink)
   doc.setFont('helvetica', 'normal')
-  doc.setFontSize(6.2)
-  doc.text(lines, PAGE.marginX + 3, boxTop + 6.8)
-  return boxTop + boxH
+  doc.setFontSize(TYPE.small)
+  doc.text(lines, PAGE.marginX + 3.2, y + 8.4)
+  return y + boxH
+}
+
+function stampAllFooters(doc) {
+  const total = doc.getNumberOfPages()
+  for (let page = 1; page <= total; page += 1) {
+    doc.setPage(page)
+    drawFooter(doc, page, total)
+  }
+}
+
+function validatePages(doc) {
+  const total = doc.getNumberOfPages()
+  if (total < 1) {
+    throw new Error('SCDAid report did not generate any pages.')
+  }
+
+  for (let page = 1; page <= total; page += 1) {
+    doc.setPage(page)
+    const size = doc.internal.pageSize
+    const width = Number(size.getWidth())
+    const height = Number(size.getHeight())
+    if (Math.abs(width - PAGE.width) > 0.4 || Math.abs(height - PAGE.height) > 0.4) {
+      throw new Error(
+        `SCDAid report page ${page} is ${width.toFixed(1)}×${height.toFixed(1)} mm; A4 portrait is required.`,
+      )
+    }
+    if (width > height) {
+      throw new Error(`SCDAid report page ${page} is landscape; portrait A4 is required.`)
+    }
+  }
 }
 
 export function createScdaidPdfDoc({ form, result, user } = {}) {
@@ -584,26 +626,29 @@ export function createScdaidPdfDoc({ form, result, user } = {}) {
   const filename = pdfFilename(buildFilename(meta))
 
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true })
-
-  drawHeader(doc, images, COPY.page1Subtitle)
-  let y = drawMetadataStrip(doc, meta, clinicianName, 39)
-  page1Content(doc, form || {}, result, y)
-  drawFooter(doc, 1)
-
-  doc.addPage('a4', 'portrait')
-  drawHeader(doc, images, COPY.page2Subtitle)
-  y = drawMetadataStrip(doc, meta, clinicianName, 39)
-  page2Content(doc, form || {}, result, y)
-  drawFooter(doc, 2)
-
-  const pageCount = doc.getNumberOfPages()
-  if (pageCount > 2) {
-    throw new Error(
-      `SCDAid report overflowed to ${pageCount} pages. The official report must stay on two A4 pages.`,
-    )
+  const ctx = {
+    doc,
+    images,
+    meta,
+    clinicianName,
+    section: 'inputs',
+    decorated: new Set(),
   }
 
-  return { doc, filename, pageCount, meta }
+  decorateCurrentPage(ctx)
+  let y = drawMetadataStrip(doc, meta, clinicianName, 43.2)
+  drawInputSections(ctx, form || {}, result, y)
+
+  ctx.section = 'outputs'
+  doc.addPage('a4', 'portrait')
+  decorateCurrentPage(ctx)
+  y = drawMetadataStrip(doc, meta, clinicianName, 43.2)
+  drawOutputSections(ctx, form || {}, result, y)
+
+  stampAllFooters(doc)
+  validatePages(doc)
+
+  return { doc, filename, pageCount: doc.getNumberOfPages(), meta }
 }
 
 export function generateScdaidReport(opts = {}) {

@@ -21,20 +21,22 @@ export const COLORS = {
 export const PAGE = {
   width: 210,
   height: 297,
-  marginX: 13,
+  marginX: 14,
   marginTop: 8,
   footerY: 287,
-  contentBottom: 281,
+  contentBottom: 278,
+  headerBottom: 41.5,
+  contentStartY: 44,
 }
 
 export const TYPE = {
-  title: 12.4,
-  subtitle: 9.2,
-  section: 8.2,
-  body: 7,
-  small: 6.4,
-  meta: 6.4,
-  footer: 6.2,
+  title: 15.5,
+  subtitle: 10,
+  section: 9.5,
+  body: 8.5,
+  small: 7.5,
+  meta: 7.5,
+  footer: 7,
 }
 
 export const COPY = {
@@ -60,17 +62,17 @@ export function tableTheme() {
       textColor: COLORS.ink,
       lineColor: COLORS.border,
       lineWidth: 0.12,
-      cellPadding: { top: 0.85, bottom: 0.85, left: 1.35, right: 1.35 },
+      cellPadding: { top: 1.6, bottom: 1.6, left: 2.1, right: 2.1 },
       overflow: 'linebreak',
       valign: 'middle',
-      minCellHeight: 4.4,
+      minCellHeight: 6.2,
     },
     headStyles: {
       fillColor: COLORS.blush,
       textColor: COLORS.burgundy,
       fontStyle: 'bold',
-      fontSize: TYPE.small,
-      cellPadding: { top: 0.9, bottom: 0.9, left: 1.35, right: 1.35 },
+      fontSize: TYPE.body,
+      cellPadding: { top: 1.7, bottom: 1.7, left: 2.1, right: 2.1 },
     },
     alternateRowStyles: {
       fillColor: [252, 250, 249],
